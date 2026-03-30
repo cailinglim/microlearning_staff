@@ -1,0 +1,2731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CaritaHub · Staff App Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<style>
+/* ============================================================
+   DESIGN TOKENS — CaritaHub Brand System
+   ============================================================ */
+:root {
+  --P:    #3D72E8;
+  --PD:   #2D5EC7;
+  --PL:   #EBF2FF;
+  --ACC:  #E07820;
+  --ACCL: #FFF3E8;
+  --SUC:  #2DAF7B;
+  --SUCL: #E6F9F2;
+  --DAN:  #E84B3D;
+  --DANL: #FEF0EF;
+  --PUR:  #7B5EA7;
+  --PURL: #F0EBF8;
+  --TEA:  #1A9FAF;
+  --TEAL: #E5F6F8;
+  --TXT:  #1A2233;
+  --MUT:  #6B7A99;
+  --BG:   #F4F6FB;
+  --BOR:  #DDE3F0;
+  --WHT:  #FFFFFF;
+  --CARD-R: 14px;
+  --PILL-R: 100px;
+  --SHADOW: 0 2px 12px rgba(61,114,232,0.12);
+  --FONT: 'Lexend', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--FONT);
+  background: #0D1526;
+  background-image: radial-gradient(rgba(61,114,232,0.09) 1px, transparent 1px);
+  background-size: 22px 22px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-start; min-height: 100vh;
+  padding: 28px 20px 48px; gap: 16px;
+}
+
+.proto-label {
+  color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500;
+  letter-spacing: 0.3px; text-align: center;
+}
+.proto-label strong { color: rgba(255,255,255,0.82); font-weight: 700; }
+
+/* ============================================================ PHONE FRAME */
+.phone {
+  width: 375px; height: 812px; background: var(--BG);
+  border-radius: 40px; overflow: hidden; position: relative;
+  display: flex; flex-direction: column;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1.5px #2A3550,
+              inset 0 0 0 1.5px rgba(255,255,255,0.06);
+}
+
+/* ============================================================ STATUS BAR */
+.status-bar {
+  height: 44px; background: var(--WHT);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 22px; flex-shrink: 0; border-bottom: 1px solid var(--BOR);
+}
+.status-time { font-size: 15px; font-weight: 700; color: var(--TXT); }
+.status-icons { display: flex; align-items: center; gap: 5px; color: var(--TXT); font-size: 14px; }
+
+/* ============================================================ SCREENS */
+.screens { flex: 1; position: relative; overflow: hidden; }
+.screen {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--BG); display: none; flex-direction: column; overflow: hidden;
+}
+.screen.active { display: flex; }
+.scroll-area { flex: 1; overflow-y: auto; padding: 18px 18px 24px; }
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* ============================================================ TAB BAR — LINE ON TOP */
+.tab-bar {
+  height: 60px; background: var(--WHT);
+  border-top: 1px solid var(--BOR); display: flex;
+  align-items: stretch; flex-shrink: 0;
+  box-shadow: 0 -2px 10px rgba(61,114,232,0.07);
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  cursor: pointer; border: none; background: transparent;
+  color: var(--MUT); font-family: var(--FONT); font-size: 12px;
+  font-weight: 500; padding: 6px 4px; position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-item i { font-size: 22px; }
+/* Active: top line indicator, primary blue text/icon — no filled box */
+.tab-item.active { color: var(--P); }
+.tab-item.active::before {
+  content: ''; position: absolute; top: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 32px; height: 3px;
+  background: var(--P); border-radius: 0 0 4px 4px;
+}
+
+/* ============================================================ SHARED */
+/* App header */
+.app-header {
+  background: var(--WHT); padding: 12px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--BOR); flex-shrink: 0;
+}
+.app-header-title { font-size: 19px; font-weight: 700; color: var(--TXT); }
+.header-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--PL); border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--P); font-size: 20px; position: relative;
+}
+.notif-dot {
+  width: 8px; height: 8px; background: var(--DAN); border-radius: 50%;
+  position: absolute; top: 6px; right: 6px; border: 2px solid var(--WHT);
+}
+
+/* Back header */
+.back-header {
+  background: var(--WHT); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--BOR); flex-shrink: 0;
+}
+.back-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--BG); border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--TXT); font-size: 20px; flex-shrink: 0;
+}
+.back-header-title { font-size: 16px; font-weight: 600; color: var(--TXT); flex: 1; }
+.back-header-action {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: transparent; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--MUT); font-size: 20px;
+}
+
+/* Cards */
+.card {
+  background: var(--WHT); border-radius: var(--CARD-R);
+  padding: 18px; box-shadow: var(--SHADOW); margin-bottom: 14px;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: var(--PILL-R);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.2px;
+}
+.badge-P    { background: var(--PL);   color: var(--PD); }
+.badge-DAN  { background: var(--DANL); color: var(--DAN); }
+.badge-SUC  { background: var(--SUCL); color: var(--SUC); }
+.badge-ACC  { background: var(--ACCL); color: var(--ACC); }
+.badge-PUR  { background: var(--PURL); color: var(--PUR); }
+.badge-TEA  { background: var(--TEAL); color: var(--TEA); }
+.badge-MUT  { background: var(--BG);   color: var(--MUT); }
+.badge-white { background: rgba(255,255,255,0.22); color: var(--WHT); }
+
+/* Section label */
+.section-lbl {
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--MUT); margin: 26px 0 12px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.section-lbl-link { font-size: 12px; font-weight: 600; color: var(--P); text-transform: none; letter-spacing: 0; }
+
+/* Progress bar */
+.prog-bar { height: 6px; background: var(--BOR); border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; background: var(--P); }
+.prog-fill.suc { background: var(--SUC); }
+.prog-row { display: flex; align-items: center; gap: 10px; }
+.prog-pct { font-size: 13px; font-weight: 600; color: var(--P); white-space: nowrap; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 11px 20px; border-radius: 12px; font-family: var(--FONT);
+  font-size: 16px; font-weight: 600; cursor: pointer; border: none;
+  transition: transform 0.15s ease; -webkit-tap-highlight-color: transparent;
+  min-height: 46px;
+}
+.btn:active { transform: scale(0.97); }
+.btn-P    { background: var(--P);   color: var(--WHT); box-shadow: 0 4px 14px rgba(61,114,232,0.32); }
+.btn-out  { background: transparent; color: var(--P); border: 1.5px solid var(--P); }
+.btn-ghost { background: var(--BG); color: var(--MUT); border: 1.5px solid var(--BOR); }
+.btn-block { width: 100%; }
+.btn-sm { padding: 8px 14px; font-size: 13px; border-radius: 10px; }
+.btn-xs { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+/* Divider */
+.divider { height: 1px; background: var(--BOR); margin: 12px 0; }
+
+/* Module icon / image — gradient tile with icon */
+.mod-icon {
+  width: 68px; height: 68px; border-radius: 12px;
+  overflow: hidden; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.mod-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mod-icon i   { font-size: 30px; color: rgba(255,255,255,0.93); }
+
+/* Course image gradient classes */
+.ci-cyber     { background: linear-gradient(135deg, #5A8FF5 0%, #2D5EC7 100%); }
+.ci-infection { background: linear-gradient(135deg, #30C4D5 0%, #0E8A9A 100%); }
+.ci-care      { background: linear-gradient(135deg, #40C483 0%, #1D8A5E 100%); }
+.ci-comm      { background: linear-gradient(135deg, #F09640 0%, #C06010 100%); }
+.ci-dementia  { background: linear-gradient(135deg, #A07ED5 0%, #7B5EA7 100%); }
+.ci-fire      { background: linear-gradient(135deg, #F06A50 0%, #C83020 100%); }
+.ci-meds      { background: linear-gradient(135deg, #5575D0 0%, #2D50A8 100%); }
+.ci-conflict  { background: linear-gradient(135deg, #E06885 0%, #B03262 100%); }
+
+/* ============================================================
+   CARITAHUB LOGO
+   ============================================================ */
+.ch-logo-svg { display: block; flex-shrink: 0; }
+
+/* ============================================================
+   HOME SCREEN
+   ============================================================ */
+
+/* Hero — inside scroll-area so it scrolls with content */
+.home-hero {
+  background: linear-gradient(140deg, var(--PD) 0%, var(--P) 60%, #5A8FF0 100%);
+  border-radius: var(--CARD-R); padding: 16px; color: var(--WHT);
+  position: relative; overflow: hidden; margin-bottom: 16px;
+}
+.home-hero::after {
+  content: ''; position: absolute; width: 180px; height: 180px;
+  background: rgba(255,255,255,0.06); border-radius: 50%;
+  right: -55px; top: -55px; pointer-events: none;
+}
+
+/* Greeting row */
+.hero-greeting-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 12px;
+}
+.hero-greet-text .hero-hello { font-size: 13px; opacity: 0.75; margin-bottom: 2px; }
+.hero-greet-text .hero-name  { font-size: 20px; font-weight: 700; }
+.hero-greet-text .hero-date  { font-size: 12px; opacity: 0.62; margin-top: 2px; }
+
+/* Streak — distinct, warm orange/amber pill style */
+.streak-pill {
+  background: linear-gradient(135deg, #FF8C00, #FF6100);
+  border-radius: 12px; padding: 8px 12px; text-align: center;
+  flex-shrink: 0; box-shadow: 0 3px 10px rgba(255,100,0,0.35);
+  min-width: 64px;
+}
+.streak-pill .sp-num  { font-size: 20px; font-weight: 700; display: block; line-height: 1.1; }
+.streak-pill .sp-lbl  { font-size: 9px; font-weight: 600; opacity: 0.88; letter-spacing: 0.4px; display: block; margin-top: 1px; }
+
+/* Stats row */
+.hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.hero-stat {
+  background: rgba(255,255,255,0.15); border-radius: 10px;
+  padding: 9px 8px; text-align: center;
+}
+.hero-stat .v { font-size: 17px; font-weight: 700; display: block; }
+.hero-stat .l { font-size: 10px; opacity: 0.78; font-weight: 500; margin-top: 1px; display: block; }
+
+/* TO-DO items */
+.todo-item {
+  background: var(--WHT); border-radius: var(--CARD-R);
+  padding: 13px 14px; box-shadow: var(--SHADOW); margin-bottom: 9px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.todo-item:active { transform: scale(0.98); }
+.todo-icon {
+  width: 42px; height: 42px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; flex-shrink: 0;
+}
+.todo-item .todo-body { flex: 1; }
+.todo-item .todo-tag  { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+.todo-item .todo-title { font-size: 14px; font-weight: 600; color: var(--TXT); margin-bottom: 2px; }
+.todo-item .todo-sub  { font-size: 13px; color: var(--MUT); }
+.todo-arrow { color: var(--BOR); font-size: 18px; }
+
+/* Horizontal scroll course rows */
+.h-scroll {
+  display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 2px;
+}
+.h-scroll::-webkit-scrollbar { display: none; }
+
+/* Small course card */
+.course-card-sm {
+  background: var(--WHT); border-radius: var(--CARD-R); padding: 0 0 11px;
+  box-shadow: var(--SHADOW); flex-shrink: 0; width: 148px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; overflow: hidden;
+}
+.course-card-sm:active { transform: scale(0.97); }
+.cc-img {
+  width: 100%; height: 80px; overflow: hidden; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.cc-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cc-img i   { font-size: 38px; color: rgba(255,255,255,0.93); }
+.cc-title { font-size: 13px; font-weight: 600; color: var(--TXT); margin-bottom: 4px; line-height: 1.35; padding: 0 12px; }
+.cc-meta  { font-size: 11px; color: var(--MUT); margin-bottom: 7px; padding: 0 12px; }
+.course-card-sm .badge { margin-left: 12px; }
+
+/* ============================================================
+   LEARN SCREEN
+   ============================================================ */
+.search-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--WHT); border: 1.5px solid var(--BOR);
+  border-radius: 12px; padding: 11px 14px; margin-bottom: 14px;
+}
+.search-bar i { font-size: 18px; color: var(--MUT); }
+.search-bar input {
+  border: none; outline: none; font-family: var(--FONT);
+  font-size: 15px; color: var(--TXT); flex: 1; background: transparent;
+}
+.search-bar input::placeholder { color: var(--MUT); }
+
+/* Filter row */
+.search-filter-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.search-filter-row .search-bar { flex: 1; margin-bottom: 0; }
+.filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: nowrap; }
+.filter-btn {
+  display: flex; align-items: center; gap: 5px; flex: 1;
+  padding: 8px 10px; border-radius: 10px; font-size: 12.5px; font-weight: 600;
+  cursor: pointer; border: 1.5px solid var(--BOR);
+  background: var(--WHT); color: var(--TXT); font-family: var(--FONT);
+  white-space: nowrap; transition: all 0.15s; justify-content: center;
+}
+.filter-btn-status {
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 12px; border-radius: 10px; font-size: 12.5px; font-weight: 600;
+  cursor: pointer; border: 1.5px solid var(--BOR); height: 42px;
+  background: var(--WHT); color: var(--TXT); font-family: var(--FONT);
+  white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+}
+.filter-btn i, .filter-btn-status i { font-size: 13px; color: var(--MUT); }
+.filter-btn .filter-caret, .filter-btn-status .filter-caret { font-size: 11px; color: var(--MUT); margin-left: 1px; }
+.filter-btn.active, .filter-btn-status.active { background: var(--PL); color: var(--P); border-color: var(--P); }
+.filter-btn.active i, .filter-btn.active .filter-caret,
+.filter-btn-status.active i, .filter-btn-status.active .filter-caret { color: var(--P); }
+
+/* Today's tip card */
+.tip-card {
+  background: linear-gradient(135deg, #E8F9F8, #D4F3F0);
+  border-radius: var(--CARD-R); border: 1.5px solid #A8E4DF;
+  padding: 15px 16px; margin-bottom: 4px;
+}
+.tip-icon-box {
+  width: 34px; height: 34px; background: var(--TEA); border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+/* Video player (lesson) */
+.step-chip-video { background: var(--TEAL); color: var(--TEA); }
+.video-player {
+  background: linear-gradient(145deg, #1e2d4a, #2d4070);
+  border-radius: var(--CARD-R); overflow: hidden; cursor: pointer;
+  position: relative; margin-bottom: 14px;
+}
+.video-thumb {
+  width: 100%; aspect-ratio: 16/9; display: flex;
+  align-items: center; justify-content: center; position: relative;
+}
+.video-play-btn {
+  width: 60px; height: 60px; background: rgba(255,255,255,0.92);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; color: var(--P); transition: transform 0.15s; flex-shrink: 0;
+}
+.video-player:active .video-play-btn { transform: scale(0.9); }
+.video-grid-lines {
+  position: absolute; inset: 0; opacity: 0.06;
+  background-image: linear-gradient(0deg, rgba(255,255,255,0.4) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.video-overlay-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.55));
+  padding: 20px 14px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.video-duration { font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 600; display: flex; align-items: center; gap: 5px; }
+.video-progress-track { flex: 1; height: 3px; background: rgba(255,255,255,0.3); border-radius: 2px; margin: 0 10px; }
+.video-progress-fill { height: 100%; background: white; border-radius: 2px; width: 0%; transition: width 0.1s linear; }
+
+/* Filter dropdown overlay */
+.filter-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 100; pointer-events: none;
+}
+.filter-overlay.open { pointer-events: all; }
+.filter-overlay-bg {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(26,34,51,0.3); display: none;
+}
+.filter-overlay.open .filter-overlay-bg { display: block; }
+.filter-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: var(--WHT); border-radius: 20px 20px 0 0;
+  padding: 16px 18px 32px;
+  transform: translateY(100%); transition: transform 0.25s ease;
+  box-shadow: 0 -4px 24px rgba(61,114,232,0.15);
+}
+.filter-overlay.open .filter-sheet { transform: translateY(0); }
+.filter-sheet h4 {
+  font-size: 15px; font-weight: 700; color: var(--TXT);
+  margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;
+}
+.filter-sheet h4 .fs-close {
+  width: 28px; height: 28px; border-radius: 50%; border: none;
+  background: var(--BG); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--MUT); font-size: 15px; font-family: var(--FONT);
+}
+.filter-options { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.filter-opt {
+  padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1.5px solid var(--BOR);
+  background: var(--WHT); color: var(--MUT); font-family: var(--FONT);
+}
+.filter-opt.sel { background: var(--PL); color: var(--P); border-color: var(--P); font-weight: 600; }
+
+.module-item {
+  background: var(--WHT); border-radius: var(--CARD-R);
+  padding: 13px 14px; box-shadow: var(--SHADOW); margin-bottom: 9px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.module-item:active { transform: scale(0.98); }
+.mod-item-info { flex: 1; min-width: 0; }
+.mod-item-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.mod-item-title { font-size: 15px; font-weight: 600; color: var(--TXT); }
+.mod-item-title-row .badge { flex-shrink: 0; font-size: 11px; }
+.mod-item-meta  { font-size: 13px; color: var(--MUT); display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+.mod-item-meta i { font-size: 13px; }
+.mod-item-prog  { margin-top: 7px; }
+.mod-item-arrow { color: var(--BOR); font-size: 18px; flex-shrink: 0; }
+
+/* ============================================================
+   MODULE DETAIL SCREEN
+   ============================================================ */
+.mod-hero {
+  background: linear-gradient(140deg, #152748, var(--PD));
+  padding: 20px 20px 24px; color: var(--WHT);
+}
+#screen-module .scroll-area { padding: 0; }
+.mod-hero .badges { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.mod-hero h2 { font-size: 20px; font-weight: 700; margin-bottom: 7px; }
+.mod-hero p  { font-size: 14px; opacity: 0.82; line-height: 1.55; }
+.mod-hero-prog {
+  background: rgba(255,255,255,0.13); border-radius: 10px;
+  padding: 11px 13px; margin-top: 14px;
+}
+.mod-hero-prog .ph-row {
+  display: flex; justify-content: space-between; font-size: 13px;
+  margin-bottom: 8px; opacity: 0.9;
+}
+.mod-hero-prog .prog-bar  { background: rgba(255,255,255,0.25); }
+.mod-hero-prog .prog-fill { background: var(--WHT); }
+
+.pre-assess-card {
+  background: linear-gradient(135deg, #E5F7F9, #D0EFF3);
+  border-radius: var(--CARD-R); padding: 14px 15px;
+  border: 1.5px solid #A2DCE4; margin-bottom: 10px;
+}
+.pre-assess-card-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.pre-assess-icon-box {
+  width: 34px; height: 34px; background: var(--TEA); border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.pre-assess-card h4 {
+  font-size: 13px; font-weight: 700; color: var(--TEA);
+  display: flex; align-items: center; gap: 6px; margin-bottom: 1px;
+}
+.pre-assess-card p { font-size: 13px; color: var(--TXT); line-height: 1.5; }
+.pre-assess-card .result-row { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
+
+.lesson-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-bottom: 1px solid var(--BOR);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.lesson-item:last-child { border-bottom: none; }
+.lesson-item:active { background: var(--BG); }
+.lesson-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--BG); display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--MUT); flex-shrink: 0;
+}
+.lesson-num.done { background: var(--SUCL); color: var(--SUC); }
+.lesson-num.curr { background: var(--PL);   color: var(--P); }
+.lesson-inf { flex: 1; }
+.lesson-inf .lt { font-size: 14px; font-weight: 500; color: var(--TXT); margin-bottom: 2px; }
+.lesson-inf .ls { font-size: 13px; color: var(--MUT); display: flex; align-items: center; gap: 8px; }
+.lesson-arrow { color: var(--BOR); font-size: 18px; }
+.lesson-arrow.act { color: var(--P); }
+
+/* ============================================================
+   LESSON PLAYER — STEP-BY-STEP
+   ============================================================ */
+.step-hdr {
+  background: var(--WHT); padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--BOR); flex-shrink: 0;
+}
+.step-hdr-left { display: flex; flex-direction: column; gap: 1px; }
+.step-hdr-title { font-size: 13px; font-weight: 600; color: var(--TXT); }
+.step-hdr-sub   { font-size: 11px; color: var(--MUT); }
+.step-dots-wrap { display: flex; align-items: center; gap: 7px; }
+.step-dot { width: 8px; height: 8px; border-radius: 4px; background: var(--BOR); transition: all 0.3s ease; flex-shrink: 0; }
+.step-dot.active { width: 24px; background: var(--P); }
+.step-dot.done   { background: var(--SUC); }
+.lesson-step { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.lesson-step.active { display: flex; }
+.step-scroll { flex: 1; overflow-y: auto; padding: 22px 18px 16px; display: flex; flex-direction: column; }
+.step-scroll::-webkit-scrollbar { display: none; }
+.step-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 12px; align-self: flex-start; }
+.step-chip-read     { background: var(--PL);   color: var(--P);   }
+.step-chip-scenario { background: var(--PURL); color: var(--PUR); }
+.step-chip-flash    { background: var(--PL);   color: var(--P);   }
+.step-chip-apply    { background: var(--ACCL); color: var(--ACC); }
+.step-chip-quiz     { background: var(--SUCL); color: var(--SUC); }
+.step-title { font-size: 20px; font-weight: 700; color: var(--TXT); margin-bottom: 16px; line-height: 1.3; }
+.step-footer { background: var(--WHT); padding: 14px 18px; border-top: 1px solid var(--BOR); flex-shrink: 0; }
+#ls-apply-input {
+  width: 100%; min-height: 130px; border-radius: 12px;
+  border: 1.5px solid var(--BOR); padding: 13px 14px;
+  font-family: var(--FONT); font-size: 15px; resize: none; outline: none;
+  color: var(--TXT); background: var(--WHT); transition: border-color 0.2s;
+  box-sizing: border-box; display: block;
+}
+#ls-apply-input:focus { border-color: var(--P); }
+.char-hint { font-size: 12px; color: var(--MUT); margin-top: 6px; text-align: right; }
+.lq-mini-prog { height: 4px; background: var(--BOR); border-radius: 2px; margin: 8px 0 18px; overflow: hidden; }
+.lq-mini-fill { height: 100%; background: var(--SUC); border-radius: 2px; transition: width 0.3s ease; }
+
+.lesson-body { font-size: 15px; line-height: 1.7; color: var(--TXT); }
+.lesson-body p { margin-bottom: 12px; }
+.lesson-body strong { font-weight: 600; }
+
+.hl-box {
+  background: #C8DCFF; border-left: 3px solid var(--P);
+  border-radius: 0 10px 10px 0; padding: 12px 14px; margin: 14px 0;
+  font-size: 14px; color: #1B3E9A; font-weight: 500; line-height: 1.5;
+}
+.warn-box {
+  background: var(--ACCL); border-left: 3px solid var(--ACC);
+  border-radius: 0 10px 10px 0; padding: 12px 14px; margin: 14px 0;
+  font-size: 14px; color: var(--ACC); font-weight: 500; line-height: 1.5;
+}
+
+.infographic {
+  background: var(--BG); border: 1.5px dashed var(--BOR); border-radius: 12px;
+  padding: 24px 16px; margin: 16px 0; text-align: center; color: var(--MUT);
+}
+.infographic i { font-size: 36px; color: var(--BOR); margin-bottom: 8px; display: block; }
+.infographic p { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.infographic small { font-size: 12px; }
+
+/* Scenario */
+.scenario-block {
+  background: var(--PURL); border-radius: var(--CARD-R); padding: 15px; margin: 14px 0;
+}
+.sc-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.sc-icon {
+  width: 30px; height: 30px; background: var(--PUR); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--WHT); font-size: 15px; flex-shrink: 0;
+}
+.sc-header h4 { font-size: 13px; font-weight: 700; color: var(--PUR); }
+.sc-text { font-size: 14px; color: var(--TXT); line-height: 1.55; margin-bottom: 12px; }
+.sc-options { display: flex; flex-direction: column; gap: 7px; }
+.sc-option {
+  background: var(--WHT); border-radius: 10px; padding: 10px 13px;
+  font-size: 13px; font-weight: 500; color: var(--TXT);
+  cursor: pointer; border: 2px solid transparent; font-family: var(--FONT);
+  text-align: left; transition: all 0.18s; display: flex; align-items: flex-start; gap: 8px;
+}
+.sc-option .opt-l { font-weight: 700; flex-shrink: 0; }
+.sc-option:hover { border-color: var(--PUR); color: var(--PUR); }
+.sc-option.sc-correct { border-color: var(--SUC); background: var(--SUCL); color: var(--SUC); }
+.sc-option.sc-wrong   { border-color: var(--DAN); background: var(--DANL); color: var(--DAN); }
+.sc-feedback {
+  font-size: 13px; line-height: 1.5; margin-top: 10px;
+  padding: 10px 12px; border-radius: 10px; display: none;
+}
+.sc-feedback.show { display: block; }
+.sc-feedback.fb-ok  { background: var(--SUCL); color: var(--SUC); }
+.sc-feedback.fb-bad { background: var(--DANL); color: var(--DAN); }
+
+/* Flashcard — fills the full step content area */
+#ls-flashcard .step-scroll {
+  padding-bottom: 8px;
+}
+#ls-flashcard .step-scroll > p { flex-shrink: 0; }
+.flashcard-wrap {
+  perspective: 800px; flex: 1; display: flex; flex-direction: column;
+  margin: 4px 0 0; cursor: pointer; min-height: 260px;
+}
+.flashcard {
+  background: linear-gradient(135deg, var(--P), var(--PD));
+  border-radius: var(--CARD-R); text-align: center; flex: 1;
+  color: var(--WHT); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; position: relative;
+  transition: transform 0.4s ease; transform-style: preserve-3d;
+}
+.flashcard.flipped { transform: rotateY(180deg); }
+.card-front, .card-back {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 28px 24px; backface-visibility: hidden;
+  border-radius: var(--CARD-R);
+}
+.card-back { background: linear-gradient(135deg, var(--SUC), #229965); transform: rotateY(180deg); }
+.fc-label    { font-size: 12px; font-weight: 700; letter-spacing: 0.8px; opacity: 0.65; margin-bottom: 12px; text-transform: uppercase; }
+.fc-question { font-size: 22px; font-weight: 700; line-height: 1.4; }
+.fc-answer   { font-size: 17px; line-height: 1.6; opacity: 0.95; }
+.fc-hint     { font-size: 13px; opacity: 0.5; margin-top: 18px; }
+
+/* Apply-it */
+.apply-block {
+  background: var(--ACCL); border-radius: var(--CARD-R); padding: 14px; margin: 14px 0;
+}
+.apply-header { display: flex; gap: 8px; align-items: center; margin-bottom: 7px; }
+.apply-header i  { color: var(--ACC); font-size: 18px; }
+.apply-header h4 { font-size: 13px; font-weight: 700; color: var(--ACC); }
+.apply-text { font-size: 14px; color: var(--TXT); line-height: 1.55; margin-bottom: 11px; }
+.apply-input {
+  background: var(--WHT); border-radius: 10px; padding: 11px 12px;
+  font-size: 13px; color: var(--MUT); border: 1.5px solid var(--BOR);
+  font-style: italic; line-height: 1.5;
+}
+
+/* (Rating + old lesson-nav removed — replaced by step-footer) */
+
+/* ============================================================
+   QUIZ SCREEN
+   ============================================================ */
+.quiz-prog-header {
+  background: var(--WHT); padding: 12px 18px;
+  flex-shrink: 0; border-bottom: 1px solid var(--BOR);
+}
+.quiz-prog-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; }
+.quiz-q-num { font-size: 14px; font-weight: 600; color: var(--P); }
+.quiz-pts   { font-size: 13px; color: var(--MUT); }
+
+.quiz-scroll { flex: 1; overflow-y: auto; padding: 18px; }
+.quiz-scroll::-webkit-scrollbar { display: none; }
+.quiz-question { font-size: 17px; font-weight: 600; color: var(--TXT); line-height: 1.5; margin-bottom: 18px; }
+.quiz-options  { display: flex; flex-direction: column; gap: 9px; margin-bottom: 16px; }
+.quiz-option {
+  background: var(--WHT); border-radius: 12px; padding: 14px 14px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; border: 2px solid var(--BOR); font-family: var(--FONT);
+  font-size: 15px; color: var(--TXT); text-align: left; transition: all 0.18s;
+  -webkit-tap-highlight-color: transparent;
+}
+.quiz-option:hover { border-color: var(--P); }
+.opt-letter {
+  width: 29px; height: 29px; border-radius: 50%;
+  background: var(--BG); display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--MUT); flex-shrink: 0;
+}
+.quiz-option.selected { border-color: var(--P); background: var(--PL); }
+.quiz-option.selected .opt-letter { background: var(--P); color: var(--WHT); }
+.quiz-option.correct  { border-color: var(--SUC); background: var(--SUCL); }
+.quiz-option.correct .opt-letter  { background: var(--SUC); color: var(--WHT); }
+.quiz-option.wrong    { border-color: var(--DAN); background: var(--DANL); }
+.quiz-option.wrong .opt-letter    { background: var(--DAN); color: var(--WHT); }
+
+.quiz-feedback {
+  padding: 12px 14px; border-radius: 10px; font-size: 14px;
+  line-height: 1.55; display: none;
+}
+.quiz-feedback.show { display: block; }
+.quiz-feedback.fb-ok  { background: var(--SUCL); color: #1D8B60; }
+.quiz-feedback.fb-bad { background: var(--DANL); color: var(--DAN); }
+
+.quiz-footer {
+  background: var(--WHT); padding: 12px 18px;
+  border-top: 1px solid var(--BOR); flex-shrink: 0;
+}
+
+/* ============================================================
+   QUIZ RESULT SCREEN
+   ============================================================ */
+.result-scroll {
+  flex: 1; overflow-y: auto; padding: 24px 18px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.result-scroll::-webkit-scrollbar { display: none; }
+.result-circle {
+  width: 116px; height: 116px; border-radius: 50%;
+  background: var(--SUCL); border: 5px solid var(--SUC);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; margin-bottom: 14px;
+}
+.result-circle.fail-circle { background: var(--DANL); border-color: var(--DAN); }
+.result-score     { font-size: 30px; font-weight: 700; color: var(--SUC); }
+.result-score.fail { color: var(--DAN); }
+.result-score-sub     { font-size: 11px; font-weight: 500; color: var(--SUC); opacity: 0.8; }
+.result-score-sub.fail { color: var(--DAN); }
+.result-title { font-size: 20px; font-weight: 700; color: var(--TXT); margin-bottom: 5px; text-align: center; }
+.result-sub   { font-size: 14px; color: var(--MUT); text-align: center; margin-bottom: 20px; line-height: 1.5; }
+.result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; width: 100%; margin-bottom: 16px; }
+.result-stat  { background: var(--WHT); border-radius: 12px; padding: 11px 8px; text-align: center; box-shadow: var(--SHADOW); }
+.result-stat .v { font-size: 17px; font-weight: 700; color: var(--P); display: block; }
+.result-stat .l { font-size: 11px; color: var(--MUT); font-weight: 500; margin-top: 2px; display: block; }
+.cert-card {
+  width: 100%; background: linear-gradient(135deg, #FFF8EE, #FFF3E0);
+  border-radius: var(--CARD-R); padding: 14px;
+  border: 1.5px solid #FFD9A8; display: flex; gap: 12px;
+  align-items: center; margin-bottom: 16px;
+}
+.cert-card .cert-icon { font-size: 32px; flex-shrink: 0; }
+.cert-card h4 { font-size: 14px; font-weight: 700; color: var(--ACC); margin-bottom: 3px; }
+.cert-card p  { font-size: 13px; color: var(--MUT); }
+.result-actions { width: 100%; display: flex; flex-direction: column; gap: 9px; }
+
+/* ============================================================
+   MY LEARNING SCREEN
+   ============================================================ */
+.ml-hero {
+  background: linear-gradient(140deg, #4B2E84, var(--PUR));
+  padding: 18px 20px 24px; color: var(--WHT);
+  flex-shrink: 0; position: relative; overflow: hidden;
+}
+.ml-hero::after {
+  content: ''; position: absolute; width: 180px; height: 180px;
+  background: rgba(255,255,255,0.05); border-radius: 50%;
+  right: -50px; top: -50px; pointer-events: none;
+}
+.ml-hero .greeting { font-size: 13px; opacity: 0.72; margin-bottom: 3px; }
+.ml-hero h2  { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+.ml-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ml-stat  {
+  background: rgba(255,255,255,0.16); border-radius: 10px;
+  padding: 9px 8px; text-align: center;
+}
+.ml-stat .v { font-size: 18px; font-weight: 700; display: block; }
+.ml-stat .l { font-size: 11px; opacity: 0.75; font-weight: 500; margin-top: 1px; display: block; }
+
+.compliance-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--BOR);
+}
+.compliance-item:last-child { border-bottom: none; }
+.comp-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.comp-info { flex: 1; }
+.comp-info .ct { font-size: 14px; font-weight: 600; color: var(--TXT); }
+.comp-info .cd { font-size: 12px; color: var(--MUT); margin-top: 1px; }
+
+.ai-path-card {
+  background: linear-gradient(135deg, #0E7A89, var(--TEA));
+  border-radius: var(--CARD-R); padding: 15px; color: var(--WHT); margin-bottom: 12px;
+}
+.ai-path-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ai-badge { background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+.ai-path-header h4 { font-size: 14px; font-weight: 700; }
+.ai-path-card > p  { font-size: 13px; opacity: 0.88; margin-bottom: 11px; }
+.path-steps { display: flex; flex-direction: column; gap: 6px; }
+.path-step {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.14); border-radius: 8px;
+  padding: 7px 10px; font-size: 13px; font-weight: 500;
+}
+.path-step .ps-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(255,255,255,0.25); display: flex; align-items: center;
+  justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+.path-step .ps-txt { flex: 1; }
+.path-step .ps-done { font-size: 14px; color: rgba(255,255,255,0.8); }
+
+.achievements-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.achievement {
+  background: var(--WHT); border-radius: var(--CARD-R);
+  padding: 13px 8px 11px; text-align: center; box-shadow: var(--SHADOW);
+}
+.ach-badge { display: flex; justify-content: center; margin-bottom: 8px; }
+.ach-badge-ring {
+  width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15); position: relative;
+}
+.ach-badge-ring i { font-size: 22px; color: white; }
+.ach-badge-ring::after {
+  content: ''; position: absolute; inset: -3px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.55); pointer-events: none;
+}
+.achievement .ach-name { font-size: 12px; font-weight: 600; color: var(--TXT); margin-bottom: 2px; }
+.achievement .ach-desc { font-size: 11px; color: var(--MUT); line-height: 1.3; }
+.achievement.locked    { opacity: 0.38; filter: grayscale(1); }
+
+.journal-entry {
+  background: var(--WHT); border-radius: var(--CARD-R);
+  padding: 13px 14px; box-shadow: var(--SHADOW); margin-bottom: 9px;
+}
+.je-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
+.je-date   { font-size: 12px; color: var(--MUT); }
+.je-mod    { font-size: 13px; font-weight: 600; color: var(--P); }
+.journal-entry p { font-size: 14px; color: var(--TXT); line-height: 1.6; }
+
+/* ============================================================
+   COMPLETED COURSES + CERTIFICATES — My Learning
+   ============================================================ */
+.comp-course-card {
+  background: var(--WHT); border-radius: var(--CARD-R);
+  box-shadow: var(--SHADOW); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 13px; padding: 12px 13px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.comp-course-card:active { transform: scale(0.98); }
+.comp-course-thumb {
+  width: 52px; height: 52px; border-radius: 11px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.comp-course-thumb i { font-size: 24px; color: rgba(255,255,255,0.93); }
+.comp-course-info { flex: 1; min-width: 0; }
+.comp-course-name { font-size: 14px; font-weight: 600; color: var(--TXT); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.comp-course-meta { font-size: 12px; color: var(--MUT); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.comp-score-bar-wrap { height: 4px; background: var(--BOR); border-radius: 3px; overflow: hidden; }
+.comp-score-bar     { height: 4px; background: var(--SUC); border-radius: 3px; }
+
+/* Certificate card */
+.cert-card {
+  background: var(--WHT); border-radius: var(--CARD-R);
+  box-shadow: var(--SHADOW); margin-bottom: 10px;
+  overflow: hidden;
+}
+.cert-card-banner {
+  height: 68px; display: flex; align-items: center; justify-content: center;
+  gap: 11px; padding: 0 16px;
+  background: linear-gradient(135deg, #2D5EC7 0%, #3D72E8 50%, #5A8FF5 100%);
+  position: relative; overflow: hidden;
+}
+.cert-card-banner::before {
+  content: ''; position: absolute; width: 130px; height: 130px;
+  border-radius: 50%; background: rgba(255,255,255,0.07);
+  right: -40px; top: -50px;
+}
+.cert-banner-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(255,255,255,0.18); display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
+}
+.cert-banner-icon i { font-size: 22px; color: #FFE066; }
+.cert-banner-text { flex: 1; }
+.cert-banner-text .cert-title { font-size: 14px; font-weight: 700; color: #FFF; }
+.cert-banner-text .cert-sub   { font-size: 11px; color: rgba(255,255,255,0.72); margin-top: 2px; }
+.cert-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px;
+}
+.cert-footer-info { font-size: 12px; color: var(--MUT); }
+.cert-footer-info strong { color: var(--TXT); }
+.cert-view-btn {
+  background: var(--PL); color: var(--P); border: none;
+  border-radius: 20px; padding: 6px 14px;
+  font-size: 12px; font-weight: 600; font-family: var(--FONT);
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
+}
+
+/* ============================================================
+   MORE SCREEN
+   ============================================================ */
+.profile-card-wrap {
+  background: linear-gradient(140deg, var(--PD), var(--P));
+  border-radius: var(--CARD-R); padding: 20px 16px; color: var(--WHT);
+  text-align: center; margin-bottom: 14px;
+}
+.profile-avatar {
+  width: 66px; height: 66px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); display: flex; align-items: center;
+  justify-content: center; font-size: 24px; font-weight: 700;
+  margin: 0 auto 11px; border: 2.5px solid rgba(255,255,255,0.35); color: var(--WHT);
+}
+.profile-card-wrap h3 { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
+.profile-card-wrap .role { font-size: 13px; opacity: 0.78; margin-bottom: 10px; }
+.profile-badges { display: flex; justify-content: center; gap: 6px; }
+.prof-badge {
+  background: rgba(255,255,255,0.18); padding: 4px 10px;
+  border-radius: 20px; font-size: 12px; font-weight: 600;
+}
+.settings-group {
+  background: var(--WHT); border-radius: var(--CARD-R);
+  box-shadow: var(--SHADOW); margin-bottom: 12px; overflow: hidden;
+}
+.settings-group-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.7px; color: var(--MUT); padding: 10px 14px 6px;
+}
+.settings-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-bottom: 1px solid var(--BOR);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.settings-item:last-child { border-bottom: none; }
+.settings-item:active { background: var(--BG); }
+.s-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+}
+.s-txt { flex: 1; }
+.s-txt .st { font-size: 14px; font-weight: 500; color: var(--TXT); }
+.s-txt .ss { font-size: 12px; color: var(--MUT); margin-top: 1px; }
+.s-arrow { color: var(--BOR); font-size: 18px; }
+.toggle {
+  width: 42px; height: 23px; background: var(--P); border-radius: 12px;
+  position: relative; cursor: pointer; flex-shrink: 0; transition: background 0.2s;
+}
+.toggle::after {
+  content: ''; position: absolute; width: 18px; height: 18px;
+  background: var(--WHT); border-radius: 50%; top: 2.5px; right: 2.5px;
+  transition: transform 0.2s;
+}
+.toggle.off { background: var(--BOR); }
+.toggle.off::after { transform: translateX(-18px); }
+
+/* ============================================================
+   NOTIFICATION PANEL
+   ============================================================ */
+.notif-panel {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 200; pointer-events: none; opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.notif-panel.open { pointer-events: all; opacity: 1; }
+.notif-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15,21,38,0.5); cursor: pointer;
+}
+.notif-drawer {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 86%;
+  background: var(--BG); overflow-y: auto; padding: 16px;
+  transform: translateX(100%); transition: transform 0.28s ease;
+}
+.notif-panel.open .notif-drawer { transform: translateX(0); }
+.notif-drawer::-webkit-scrollbar { display: none; }
+.notif-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-top: 4px; }
+.notif-top h3 { font-size: 17px; font-weight: 700; color: var(--TXT); }
+.notif-top .close-btn {
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: var(--BOR); display: flex; align-items: center;
+  justify-content: center; cursor: pointer; color: var(--MUT); font-size: 16px;
+}
+.notif-item {
+  background: var(--WHT); border-radius: 12px; padding: 11px 13px;
+  margin-bottom: 7px; display: flex; gap: 10px; align-items: flex-start;
+}
+.notif-item.unread { border-left: 3px solid var(--P); }
+.n-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+}
+.n-content { flex: 1; }
+.n-title { font-size: 13px; font-weight: 600; color: var(--TXT); margin-bottom: 2px; }
+.n-text  { font-size: 12px; color: var(--MUT); line-height: 1.4; }
+.n-time  { font-size: 10px; color: var(--BOR); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<p class="proto-label"><strong>CaritaHub — Staff Learning App</strong> &nbsp;·&nbsp; Interactive Prototype &nbsp;·&nbsp; March 2026</p>
+
+<div class="phone">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <i class="ph ph-wifi-high"></i>
+      <i class="ph ph-cell-signal-full"></i>
+      <i class="ph-fill ph-battery-full"></i>
+    </div>
+  </div>
+
+  <div class="screens">
+
+    <!-- ====================================================
+         SCREEN: HOME
+         ==================================================== -->
+    <div id="screen-home" class="screen active">
+
+      <!-- Header with CaritaHub logo -->
+      <div class="app-header">
+        <!-- CaritaHub logo — drop logo.png (transparent bg) into assets/ to replace -->
+        <img src="assets/logo.svg" class="ch-logo-svg" alt="CaritaHub" style="height:34px;width:auto;">
+        <div class="header-actions">
+          <button class="icon-btn" onclick="toggleNotif()">
+            <i class="ph-fill ph-bell"></i>
+            <span class="notif-dot"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable area — hero is INSIDE scroll so it scrolls away -->
+      <div class="scroll-area">
+
+        <!-- Home hero (scrollable) — compact -->
+        <div class="home-hero">
+          <div class="hero-greeting-row">
+            <div class="hero-greet-text">
+              <p class="hero-hello">Good morning 👋</p>
+              <h2 class="hero-name">Sarah Chen</h2>
+              <p class="hero-date">Monday, 30 March 2026</p>
+            </div>
+            <!-- Streak: distinct warm-orange style, separate from stats -->
+            <div class="streak-pill">
+              <span class="sp-num">🔥 5</span>
+              <span class="sp-lbl">DAY STREAK</span>
+            </div>
+          </div>
+          <!-- Stats: course progress, modules, XP — same style, distinct from streak -->
+          <div class="hero-stats">
+            <div class="hero-stat"><span class="v">40%</span><span class="l">Progress</span></div>
+            <div class="hero-stat"><span class="v">3</span><span class="l">Modules Done</span></div>
+            <div class="hero-stat"><span class="v">+12</span><span class="l">XP Today</span></div>
+          </div>
+        </div>
+
+        <!-- TO-DO section — mandatory + flashcard grouped together -->
+        <div class="section-lbl">TO-DO</div>
+
+        <!-- Todo: Mandatory learning -->
+        <div class="todo-item" onclick="navigate('screen-module')">
+          <div class="todo-icon" style="background:var(--DANL);color:var(--DAN);">
+            <i class="ph-fill ph-shield-warning"></i>
+          </div>
+          <div class="todo-body">
+            <div class="todo-tag" style="color:var(--DAN);">MANDATORY LEARNING</div>
+            <div class="todo-title">Cybersecurity Basics</div>
+            <div class="todo-sub"><i class="ph ph-clock" style="font-size:12px;"></i> Due in 2 days &nbsp;·&nbsp; 40% done</div>
+          </div>
+          <i class="ph ph-caret-right todo-arrow"></i>
+        </div>
+
+        <!-- Todo: Flashcard review — no content shown, just module name + count -->
+        <div class="todo-item" onclick="navigate('screen-fcreview')">
+          <div class="todo-icon" style="background:var(--TEAL);color:var(--TEA);">
+            <i class="ph-fill ph-cards"></i>
+          </div>
+          <div class="todo-body">
+            <div class="todo-tag" style="color:var(--TEA);">FLASHCARD REVIEW</div>
+            <div class="todo-title">Cybersecurity Basics</div>
+            <div class="todo-sub">3 cards ready for review</div>
+          </div>
+          <i class="ph ph-caret-right todo-arrow"></i>
+        </div>
+
+        <!-- NEW THIS WEEK -->
+        <div class="section-lbl">
+          <span>NEW THIS WEEK</span>
+          <span class="section-lbl-link" onclick="switchTab('learn')">See all →</span>
+        </div>
+
+        <div class="h-scroll">
+          <div class="course-card-sm" onclick="switchTab('learn')">
+            <div class="cc-img ci-infection"><i class="ph-fill ph-thermometer"></i></div>
+            <div class="cc-title">Infection Control</div>
+            <div class="cc-meta"><i class="ph ph-book-open"></i> 4 lessons</div>
+            <span class="badge badge-DAN" style="font-size:10px;">NEW</span>
+          </div>
+          <div class="course-card-sm" onclick="switchTab('learn')">
+            <div class="cc-img ci-meds"><i class="ph-fill ph-pill"></i></div>
+            <div class="cc-title">Medication Management</div>
+            <div class="cc-meta"><i class="ph ph-book-open"></i> 5 lessons</div>
+            <span class="badge badge-DAN" style="font-size:10px;">NEW</span>
+          </div>
+          <div class="course-card-sm" onclick="switchTab('learn')">
+            <div class="cc-img ci-conflict"><i class="ph-fill ph-handshake"></i></div>
+            <div class="cc-title">Conflict Resolution</div>
+            <div class="cc-meta"><i class="ph ph-book-open"></i> 3 lessons</div>
+            <span class="badge badge-DAN" style="font-size:10px;">NEW</span>
+          </div>
+        </div>
+
+        <!-- RECOMMENDED FOR YOU -->
+        <div class="section-lbl" style="margin-top:18px;">
+          <span>RECOMMENDED FOR YOU</span>
+          <span class="section-lbl-link" onclick="switchTab('learn')">See all →</span>
+        </div>
+
+        <div class="h-scroll" style="margin-bottom:6px;">
+          <div class="course-card-sm" onclick="switchTab('learn')">
+            <div class="cc-img ci-dementia"><i class="ph-fill ph-brain"></i></div>
+            <div class="cc-title">Dementia Care</div>
+            <div class="cc-meta"><i class="ph ph-book-open"></i> 5 lessons</div>
+            <span class="badge badge-PUR" style="font-size:10px;">For Nurses</span>
+          </div>
+          <div class="course-card-sm" onclick="switchTab('learn')">
+            <div class="cc-img ci-comm"><i class="ph-fill ph-chat-circle-dots"></i></div>
+            <div class="cc-title">Communication Skills</div>
+            <div class="cc-meta"><i class="ph ph-book-open"></i> 4 lessons</div>
+            <span class="badge badge-TEA" style="font-size:10px;">Popular</span>
+          </div>
+          <div class="course-card-sm" onclick="switchTab('learn')">
+            <div class="cc-img ci-care"><i class="ph-fill ph-heart"></i></div>
+            <div class="cc-title">Patient Care Essentials</div>
+            <div class="cc-meta"><i class="ph ph-book-open"></i> 6 lessons</div>
+            <span class="badge badge-SUC" style="font-size:10px;">Top Rated</span>
+          </div>
+        </div>
+
+        <!-- AI tip -->
+        <div class="section-lbl" style="margin-top:18px;">TODAY'S TIP</div>
+        <div class="tip-card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div class="tip-icon-box"><i class="ph-fill ph-robot" style="font-size:16px;color:white;"></i></div>
+            <div>
+              <span style="font-size:12px;font-weight:700;color:var(--TEA);display:block;letter-spacing:0.3px;">AI LEARNING TIP</span>
+              <span style="font-size:11px;color:var(--MUT);">Tailored to your learning</span>
+            </div>
+          </div>
+          <p style="font-size:14px;color:var(--TXT);line-height:1.65;">Always verify the sender's email address before clicking links. Attackers often use addresses like <strong>it-support@carita-hub.net</strong> — look for subtle misspellings.</p>
+        </div>
+
+      </div>
+    </div><!-- /screen-home -->
+
+
+    <!-- ====================================================
+         SCREEN: LEARN
+         ==================================================== -->
+    <div id="screen-learn" class="screen">
+
+      <div class="app-header">
+        <span class="app-header-title">Learn</span>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="toggleNotif()"><i class="ph ph-bell"></i></button>
+        </div>
+      </div>
+
+      <div class="scroll-area">
+        <!-- Search + Status filter in one row -->
+        <div class="search-filter-row">
+          <div class="search-bar">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" placeholder="Search modules, topics…">
+          </div>
+          <button class="filter-btn-status" id="status-filter-btn" onclick="openFilter('status')">
+            <i class="ph ph-funnel"></i> All
+            <i class="ph ph-caret-down filter-caret"></i>
+          </button>
+        </div>
+
+        <!-- Topic + Duration in one row -->
+        <div class="filter-row">
+          <button class="filter-btn active" id="topic-filter-btn" onclick="openFilter('topic')">
+            <i class="ph-fill ph-tag"></i> All Topics
+            <i class="ph ph-caret-down filter-caret"></i>
+          </button>
+          <button class="filter-btn" id="duration-filter-btn" onclick="openFilter('duration')">
+            <i class="ph-fill ph-clock"></i> Any Duration
+            <i class="ph ph-caret-down filter-caret"></i>
+          </button>
+        </div>
+
+        <div class="section-lbl">MANDATORY MODULES</div>
+
+        <div class="module-item" onclick="navigate('screen-module')">
+          <div class="mod-icon ci-cyber"><i class="ph-fill ph-shield-check"></i></div>
+          <div class="mod-item-info">
+            <div class="mod-item-title-row">
+              <div class="mod-item-title">Cybersecurity Basics</div>
+              <span class="badge badge-DAN">DUE 1 APR</span>
+            </div>
+            <div class="mod-item-meta"><i class="ph ph-book-open"></i> 5 lessons &nbsp;·&nbsp; <i class="ph-fill ph-clock"></i> 25 min</div>
+            <div class="mod-item-prog">
+              <div class="prog-row">
+                <div class="prog-bar" style="flex:1"><div class="prog-fill" style="width:40%"></div></div>
+                <span class="prog-pct">40%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="module-item">
+          <div class="mod-icon ci-infection"><i class="ph-fill ph-thermometer"></i></div>
+          <div class="mod-item-info">
+            <div class="mod-item-title-row">
+              <div class="mod-item-title">Infection Control</div>
+              <span class="badge badge-ACC">DUE 15 APR</span>
+            </div>
+            <div class="mod-item-meta"><i class="ph ph-book-open"></i> 4 lessons &nbsp;·&nbsp; <i class="ph-fill ph-clock"></i> 20 min</div>
+            <div class="mod-item-prog">
+              <div class="prog-row">
+                <div class="prog-bar" style="flex:1"><div class="prog-fill" style="width:0%"></div></div>
+                <span class="prog-pct" style="color:var(--MUT);">0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-lbl">ALL MODULES</div>
+
+        <div class="module-item" onclick="navigate('screen-module')">
+          <div class="mod-icon ci-care"><i class="ph-fill ph-heart"></i></div>
+          <div class="mod-item-info">
+            <div class="mod-item-title">Patient Care Essentials</div>
+            <div class="mod-item-meta"><i class="ph ph-book-open"></i> 6 lessons &nbsp;·&nbsp; <i class="ph-fill ph-clock"></i> 30 min</div>
+          </div>
+          <i class="ph ph-caret-right mod-item-arrow"></i>
+        </div>
+
+        <div class="module-item">
+          <div class="mod-icon ci-comm"><i class="ph-fill ph-chat-circle-dots"></i></div>
+          <div class="mod-item-info">
+            <div class="mod-item-title">Communication Skills</div>
+            <div class="mod-item-meta"><i class="ph ph-book-open"></i> 4 lessons &nbsp;·&nbsp; <i class="ph-fill ph-clock"></i> 22 min</div>
+          </div>
+          <i class="ph ph-caret-right mod-item-arrow"></i>
+        </div>
+
+        <div class="module-item">
+          <div class="mod-icon ci-dementia"><i class="ph-fill ph-brain"></i></div>
+          <div class="mod-item-info">
+            <div class="mod-item-title">Dementia Care</div>
+            <div class="mod-item-meta"><i class="ph ph-book-open"></i> 5 lessons &nbsp;·&nbsp; <i class="ph-fill ph-clock"></i> 28 min</div>
+          </div>
+          <i class="ph ph-caret-right mod-item-arrow"></i>
+        </div>
+
+        <div class="module-item">
+          <div class="mod-icon ci-fire"><i class="ph-fill ph-fire"></i></div>
+          <div class="mod-item-info">
+            <div class="mod-item-title">Fire Safety Procedures</div>
+            <div class="mod-item-meta"><i class="ph ph-book-open"></i> 3 lessons &nbsp;·&nbsp; <i class="ph-fill ph-clock"></i> 15 min</div>
+          </div>
+          <i class="ph ph-caret-right mod-item-arrow"></i>
+        </div>
+
+        <div class="module-item">
+          <div class="mod-icon ci-meds"><i class="ph-fill ph-pill"></i></div>
+          <div class="mod-item-info">
+            <div class="mod-item-title-row">
+              <div class="mod-item-title">Medication Management</div>
+              <span class="badge badge-P">NEW</span>
+            </div>
+            <div class="mod-item-meta"><i class="ph ph-book-open"></i> 5 lessons &nbsp;·&nbsp; <i class="ph-fill ph-clock"></i> 24 min</div>
+          </div>
+          <i class="ph ph-caret-right mod-item-arrow"></i>
+        </div>
+
+        <div class="module-item">
+          <div class="mod-icon ci-conflict"><i class="ph-fill ph-handshake"></i></div>
+          <div class="mod-item-info">
+            <div class="mod-item-title-row">
+              <div class="mod-item-title">Conflict Resolution</div>
+              <span class="badge badge-P">NEW</span>
+            </div>
+            <div class="mod-item-meta"><i class="ph ph-book-open"></i> 3 lessons &nbsp;·&nbsp; <i class="ph-fill ph-clock"></i> 15 min</div>
+          </div>
+          <i class="ph ph-caret-right mod-item-arrow"></i>
+        </div>
+
+      </div>
+
+      <!-- Filter sheets -->
+      <div class="filter-overlay" id="filter-overlay">
+        <div class="filter-overlay-bg" onclick="closeFilter()"></div>
+        <div class="filter-sheet">
+          <h4 id="filter-sheet-title">Filter by Topic <button class="fs-close" onclick="closeFilter()">✕</button></h4>
+          <div class="filter-options" id="filter-options"></div>
+          <button class="btn btn-P btn-block btn-sm" onclick="closeFilter()">Apply Filter</button>
+        </div>
+      </div>
+
+    </div><!-- /screen-learn -->
+
+
+    <!-- ====================================================
+         SCREEN: MODULE DETAIL
+         ==================================================== -->
+    <div id="screen-module" class="screen">
+
+      <div class="back-header">
+        <button class="back-btn" onclick="goBack()"><i class="ph ph-arrow-left"></i></button>
+        <span class="back-header-title">Module Detail</span>
+        <button class="back-header-action"><i class="ph ph-share-network"></i></button>
+      </div>
+
+      <div class="scroll-area">
+        <div class="mod-hero">
+          <div class="badges">
+            <span class="badge badge-white"><i class="ph-fill ph-warning"></i> MANDATORY</span>
+            <span class="badge badge-white">CYBERSECURITY</span>
+          </div>
+          <h2>Cybersecurity Basics</h2>
+          <p>Protect patient data and your organisation from digital threats. Essential knowledge for all care staff.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.18);color:white;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:600;"><i class="ph-fill ph-clock"></i> 25 min</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.18);color:white;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:600;"><i class="ph ph-book-open"></i> 5 Lessons</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.18);color:white;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:600;"><i class="ph ph-certificate"></i> Certificate</span>
+          </div>
+          <div class="mod-hero-prog">
+            <div class="ph-row"><span>Your Progress</span><span>2 / 5 lessons · 40%</span></div>
+            <div class="prog-bar"><div class="prog-fill" style="width:40%"></div></div>
+          </div>
+        </div>
+
+        <div style="padding:18px 18px 24px;">
+        <div class="pre-assess-card">
+          <div class="pre-assess-card-hdr">
+            <div class="pre-assess-icon-box"><i class="ph-fill ph-exam" style="font-size:16px;color:white;"></i></div>
+            <div>
+              <h4>Pre-Assessment Completed</h4>
+              <p style="font-size:11px;color:var(--MUT);margin:0;">Pathway personalised for you</p>
+            </div>
+          </div>
+          <p>You scored <strong>60%</strong> — some foundational content has been highlighted.</p>
+          <div class="result-row">
+            <div class="prog-bar" style="flex:1"><div class="prog-fill" style="background:var(--TEA);width:60%"></div></div>
+            <span style="font-size:13px;font-weight:700;color:var(--TEA);">60%</span>
+            <span class="badge badge-TEA">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="section-lbl">LESSONS</div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="lesson-item">
+            <div class="lesson-num done"><i class="ph-fill ph-check"></i></div>
+            <div class="lesson-inf">
+              <div class="lt">1. Password Security</div>
+              <div class="ls"><i class="ph-fill ph-clock"></i> 4 min &nbsp;·&nbsp; Text + Flashcard</div>
+            </div>
+            <i class="ph ph-check-circle lesson-arrow" style="color:var(--SUC);"></i>
+          </div>
+          <div class="lesson-item" onclick="navigate('screen-lesson')">
+            <div class="lesson-num curr"><i class="ph ph-play"></i></div>
+            <div class="lesson-inf">
+              <div class="lt">2. Phishing &amp; Email Safety</div>
+              <div class="ls"><i class="ph-fill ph-clock"></i> 4 min &nbsp;·&nbsp; Text + Scenario</div>
+            </div>
+            <i class="ph ph-caret-right lesson-arrow act"></i>
+          </div>
+          <div class="lesson-item">
+            <div class="lesson-num">3</div>
+            <div class="lesson-inf">
+              <div class="lt">3. Safe Web Browsing</div>
+              <div class="ls"><i class="ph-fill ph-clock"></i> 5 min &nbsp;·&nbsp; Text + Infographic</div>
+            </div>
+            <i class="ph ph-lock lesson-arrow" style="font-size:16px;"></i>
+          </div>
+          <div class="lesson-item">
+            <div class="lesson-num">4</div>
+            <div class="lesson-inf">
+              <div class="lt">4. Device &amp; Data Protection</div>
+              <div class="ls"><i class="ph-fill ph-clock"></i> 6 min &nbsp;·&nbsp; Text + Video</div>
+            </div>
+            <i class="ph ph-lock lesson-arrow" style="font-size:16px;"></i>
+          </div>
+          <div class="lesson-item">
+            <div class="lesson-num">5</div>
+            <div class="lesson-inf">
+              <div class="lt">5. Incident Reporting</div>
+              <div class="ls"><i class="ph-fill ph-clock"></i> 6 min &nbsp;·&nbsp; Text + Scenario</div>
+            </div>
+            <i class="ph ph-lock lesson-arrow" style="font-size:16px;"></i>
+          </div>
+          <div class="lesson-item" style="background:var(--BG);">
+            <div class="lesson-num" style="background:var(--ACCL);color:var(--ACC);"><i class="ph ph-trophy"></i></div>
+            <div class="lesson-inf">
+              <div class="lt" style="color:var(--ACC);">Final Knowledge Quiz</div>
+              <div class="ls"><i class="ph ph-question"></i> 10 questions &nbsp;·&nbsp; Pass 70%</div>
+            </div>
+            <i class="ph ph-lock lesson-arrow" style="font-size:16px;"></i>
+          </div>
+        </div>
+
+        <button class="btn btn-P btn-block" style="margin-top:4px;" onclick="navigate('screen-lesson')">
+          <i class="ph ph-play"></i> Continue Lesson 2
+        </button>
+        </div><!-- /inner padding -->
+      </div>
+    </div><!-- /screen-module -->
+
+
+    <!-- ====================================================
+         SCREEN: FLASHCARD REVIEW
+         ==================================================== -->
+    <div id="screen-fcreview" class="screen">
+
+      <div class="back-header">
+        <button class="back-btn" onclick="goBack()"><i class="ph ph-arrow-left"></i></button>
+        <span class="back-header-title">Flashcard Review</span>
+        <button class="back-header-action" onclick="goBack()"><i class="ph ph-x"></i></button>
+      </div>
+
+      <!-- Progress row -->
+      <div style="background:var(--WHT);padding:10px 18px 12px;border-bottom:1px solid var(--BOR);flex-shrink:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:13px;font-weight:600;color:var(--TXT);" id="fcr-counter">Card 1 of 3</span>
+          <span style="font-size:12px;color:var(--MUT);" id="fcr-topic">Cybersecurity Basics</span>
+        </div>
+        <div style="display:flex;gap:5px;" id="fcr-dots"></div>
+      </div>
+
+      <!-- Card area -->
+      <div style="flex:1;display:flex;flex-direction:column;padding:18px 18px 0;overflow:hidden;">
+
+        <!-- Flip card -->
+        <div style="perspective:900px;flex:1;display:flex;flex-direction:column;cursor:pointer;" onclick="fcrFlip()" id="fcr-wrap">
+          <div id="fcr-card" style="flex:1;border-radius:var(--CARD-R);position:relative;transform-style:preserve-3d;transition:transform 0.42s ease;box-shadow:0 6px 24px rgba(61,114,232,0.16);">
+
+            <!-- Front -->
+            <div style="position:absolute;inset:0;border-radius:var(--CARD-R);background:linear-gradient(145deg,var(--PD),var(--P));display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;backface-visibility:hidden;-webkit-backface-visibility:hidden;">
+              <span style="font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.55);text-transform:uppercase;margin-bottom:18px;" id="fcr-front-label">Question</span>
+              <p style="font-size:22px;font-weight:700;color:white;text-align:center;line-height:1.45;margin:0;" id="fcr-question">—</p>
+              <span style="font-size:13px;color:rgba(255,255,255,0.45);margin-top:24px;">Tap card to reveal answer</span>
+            </div>
+
+            <!-- Back -->
+            <div style="position:absolute;inset:0;border-radius:var(--CARD-R);background:linear-gradient(145deg,#1A2F5E,#2D4A8A);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);">
+              <span style="font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.55);text-transform:uppercase;margin-bottom:18px;">Answer</span>
+              <p style="font-size:16px;color:rgba(255,255,255,0.93);text-align:center;line-height:1.65;margin:0;" id="fcr-answer">—</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Action buttons — hidden until card is flipped -->
+        <div id="fcr-actions" style="padding:16px 0 18px;display:flex;gap:10px;flex-shrink:0;opacity:0;pointer-events:none;transition:opacity 0.2s;">
+          <button class="btn btn-out" style="flex:1;gap:6px;" onclick="fcrAnswer('practice')">
+            <i class="ph-fill ph-arrow-counter-clockwise"></i> Practice again
+          </button>
+          <button class="btn btn-P" style="flex:1;gap:6px;" onclick="fcrAnswer('know')">
+            <i class="ph-fill ph-check"></i> Got it
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Summary screen (hidden until done) -->
+      <div id="fcr-summary" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;text-align:center;">
+        <div style="width:72px;height:72px;border-radius:50%;background:var(--SUCL);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+          <i class="ph-fill ph-confetti" style="font-size:34px;color:var(--SUC);"></i>
+        </div>
+        <h3 style="font-size:20px;font-weight:700;color:var(--TXT);margin-bottom:8px;">Review complete!</h3>
+        <p style="font-size:14px;color:var(--MUT);margin-bottom:24px;" id="fcr-summary-text">—</p>
+        <div style="display:flex;gap:10px;width:100%;">
+          <div style="flex:1;background:var(--SUCL);border-radius:12px;padding:16px 12px;text-align:center;">
+            <div style="font-size:30px;font-weight:700;color:var(--SUC);" id="fcr-know-count">0</div>
+            <div style="font-size:12px;color:var(--MUT);margin-top:4px;">Got it</div>
+          </div>
+          <div style="flex:1;background:var(--ACCL);border-radius:12px;padding:16px 12px;text-align:center;">
+            <div style="font-size:30px;font-weight:700;color:var(--ACC);" id="fcr-practice-count">0</div>
+            <div style="font-size:12px;color:var(--MUT);margin-top:4px;">Practice again</div>
+          </div>
+        </div>
+        <button class="btn btn-P btn-block" style="margin-top:20px;" onclick="goBack()">
+          <i class="ph ph-check-circle"></i> Done
+        </button>
+        <button class="btn btn-out btn-block" style="margin-top:10px;" id="fcr-retry-btn" onclick="startFcReview()">
+          <i class="ph ph-arrow-counter-clockwise"></i> Review missed cards
+        </button>
+      </div>
+
+    </div><!-- /screen-fcreview -->
+
+
+    <!-- ====================================================
+         SCREEN: LESSON PLAYER
+         ==================================================== -->
+    <div id="screen-lesson" class="screen">
+
+      <!-- Step header: back + title/subtitle + progress dots -->
+      <div class="back-header">
+        <button class="back-btn" onclick="lessonBack()"><i class="ph ph-arrow-left"></i></button>
+        <span class="back-header-title">Phishing &amp; Email Safety</span>
+        <div style="width:32px;"></div>
+      </div>
+
+      <div class="step-hdr">
+        <div class="step-hdr-left">
+          <span class="step-hdr-title">Lesson 2 of 5</span>
+          <span class="step-hdr-sub"><i class="ph-fill ph-clock" style="font-size:11px;"></i> 4 min &nbsp;·&nbsp; Cybersecurity Basics</span>
+        </div>
+        <div class="step-dots-wrap" id="step-dots">
+          <div class="step-dot active" id="sdot-0"></div>
+          <div class="step-dot" id="sdot-1"></div>
+          <div class="step-dot" id="sdot-2"></div>
+          <div class="step-dot" id="sdot-3"></div>
+          <div class="step-dot" id="sdot-4"></div>
+          <div class="step-dot" id="sdot-5"></div>
+        </div>
+      </div>
+
+      <!-- ── STEP 1: READ ────────────────────────────────── -->
+      <div class="lesson-step active" id="ls-read">
+        <div class="step-scroll">
+          <span class="step-chip step-chip-read"><i class="ph-fill ph-book-open"></i> Read</span>
+          <h2 class="step-title">Phishing &amp; Email Safety</h2>
+          <div class="lesson-body">
+            <p>Phishing attacks are one of the most common cybersecurity threats in healthcare settings. Attackers send deceptive emails that appear to come from trusted sources — tricking you into revealing credentials or clicking malicious links.</p>
+            <div class="hl-box">
+              <i class="ph-fill ph-info" style="margin-right:6px;"></i>
+              <strong>Key Stat:</strong> Over 90% of data breaches in healthcare start with a phishing email. One click can compromise an entire network.
+            </div>
+            <p>Phishing emails often create a sense of <strong>urgency</strong> — <em>"Your account will be suspended in 24 hours."</em> This pressure is intentional, designed to make you act before you think.</p>
+          </div>
+          <div class="infographic">
+            <i class="ph ph-warning-circle"></i>
+            <p>Red Flags in a Phishing Email</p>
+            <small>Sender mismatch · Urgent language · Suspicious links · Generic greeting · Odd attachments</small>
+          </div>
+          <div class="lesson-body">
+            <div class="warn-box">
+              <i class="ph-fill ph-warning" style="margin-right:6px;"></i>
+              <strong>Never</strong> enter your password after clicking a link in an email. Always navigate directly to the site by typing the URL yourself.
+            </div>
+          </div>
+        </div>
+        <div class="step-footer" style="display:flex;gap:10px;">
+          <button class="btn btn-ghost" id="read-aloud-btn" onclick="toggleReadAloud()" title="Read aloud" style="flex-shrink:0;padding:15px 16px;">
+            <i class="ph-fill ph-speaker-high"></i>
+          </button>
+          <button class="btn btn-P" style="flex:1;" onclick="lessonNext()">Done Reading <i class="ph ph-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- ── STEP 2: VIDEO ──────────────────────────────── -->
+      <div class="lesson-step" id="ls-video">
+        <div class="step-scroll">
+          <span class="step-chip step-chip-video"><i class="ph-fill ph-play-circle"></i> Watch</span>
+          <h2 class="step-title">Watch: How Phishing Works</h2>
+          <div class="video-player" onclick="playLessonVideo()">
+            <div class="video-thumb">
+              <div class="video-grid-lines"></div>
+              <div class="video-play-btn" id="video-play-btn"><i class="ph-fill ph-play" style="margin-left:3px;"></i></div>
+              <div class="video-overlay-bar">
+                <span class="video-duration"><i class="ph-fill ph-clock"></i> 2:15</span>
+                <div class="video-progress-track"><div class="video-progress-fill" id="video-prog-fill"></div></div>
+                <span style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:600;" id="video-time-label">0:00</span>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:14px;color:var(--MUT);line-height:1.65;margin-top:4px;">This short video explains how phishing attacks target healthcare workers, and the simple steps to protect yourself and your organisation.</p>
+          <div class="hl-box" style="margin-top:14px;">
+            <i class="ph-fill ph-lightbulb" style="margin-right:6px;"></i>
+            <strong>Key takeaway:</strong> Pause and verify before you click — it takes seconds and can prevent a major breach.
+          </div>
+        </div>
+        <div class="step-footer">
+          <button class="btn btn-P btn-block" id="video-next-btn" onclick="lessonNext()" disabled style="opacity:0.45;">
+            Continue <i class="ph ph-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── STEP 3: SCENARIO ───────────────────────────── -->
+      <div class="lesson-step" id="ls-scenario">
+        <div class="step-scroll">
+          <span class="step-chip step-chip-scenario"><i class="ph-fill ph-users-three"></i> Scenario</span>
+          <h2 class="step-title">What would you do?</h2>
+          <div class="scenario-block">
+            <div class="sc-header">
+              <div class="sc-icon"><i class="ph-fill ph-envelope-simple-open"></i></div>
+              <h4>Scenario Simulation</h4>
+            </div>
+            <p class="sc-text">You receive an email: <em>"Dear Staff Member, your CaritaHub login will expire tonight. Click here to verify your password immediately — IT Support."</em><br><br>What is the best course of action?</p>
+            <div class="sc-options">
+              <button class="sc-option" onclick="selectLessonScenario(this, false)"><span class="opt-l">A.</span> Click the link to verify your account</button>
+              <button class="sc-option" onclick="selectLessonScenario(this, false)"><span class="opt-l">B.</span> Reply with your current password</button>
+              <button class="sc-option" onclick="selectLessonScenario(this, true)"><span class="opt-l">C.</span> Delete the email and report it to IT immediately</button>
+              <button class="sc-option" onclick="selectLessonScenario(this, false)"><span class="opt-l">D.</span> Forward it to a colleague to check first</button>
+            </div>
+            <div id="ls-sc-feedback" class="sc-feedback"></div>
+          </div>
+        </div>
+        <div class="step-footer">
+          <button class="btn btn-P btn-block" id="sc-next-btn" onclick="lessonNext()" disabled style="opacity:0.45;">
+            Next <i class="ph ph-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── STEP 3: FLASHCARD ──────────────────────────── -->
+      <div class="lesson-step" id="ls-flashcard">
+        <div class="step-scroll">
+          <span class="step-chip step-chip-flash"><i class="ph-fill ph-cards"></i> Flashcard</span>
+          <h2 class="step-title">Test Your Knowledge</h2>
+          <p class="lesson-body" style="margin-bottom:14px;color:var(--MUT);font-size:14px;">Tap the card to reveal the answer.</p>
+          <div class="flashcard-wrap" onclick="flipLessonCard()">
+            <div class="flashcard" id="ls-flashcard-card">
+              <div class="card-front">
+                <span class="fc-label">Definition</span>
+                <h3 class="fc-question">What is "Spear Phishing"?</h3>
+                <span class="fc-hint">Tap to reveal →</span>
+              </div>
+              <div class="card-back">
+                <span class="fc-label">Answer</span>
+                <p class="fc-answer">A targeted phishing attack where the attacker personalises the email using information about the specific victim — their name, role, or colleagues — to make it more convincing.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="step-footer">
+          <button class="btn btn-P btn-block" id="fc-next-btn" onclick="lessonNext()" disabled style="opacity:0.45;">
+            Got it <i class="ph ph-check"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── STEP 4: APPLY IT ───────────────────────────── -->
+      <div class="lesson-step" id="ls-apply">
+        <div class="step-scroll">
+          <span class="step-chip step-chip-apply"><i class="ph-fill ph-pencil-line"></i> Apply It</span>
+          <h2 class="step-title">Reflect &amp; Apply</h2>
+          <div class="apply-block">
+            <div class="apply-header">
+              <i class="ph-fill ph-clipboard-text"></i>
+              <h4>Your Reflection</h4>
+            </div>
+            <p class="apply-text">Think about the last unexpected email you received at work. What signals would tell you it was a phishing attempt? Write down 2–3 red flags you would look for.</p>
+          </div>
+          <div style="margin-top:14px;">
+            <textarea id="ls-apply-input" placeholder="e.g. The sender's address looks off — carita-hub.net instead of caritahub.com…" oninput="checkApplyInput()"></textarea>
+            <p class="char-hint" id="apply-char-hint">0 / 20 characters minimum</p>
+          </div>
+        </div>
+        <div class="step-footer">
+          <button class="btn btn-P btn-block" id="apply-next-btn" onclick="lessonNext()" disabled style="opacity:0.45;">
+            Save to Journal <i class="ph ph-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── STEP 5: QUIZ ───────────────────────────────── -->
+      <div class="lesson-step" id="ls-quiz">
+        <div class="step-scroll">
+          <span class="step-chip step-chip-quiz" id="lq-chip"><i class="ph-fill ph-check-square"></i> Quiz · 1/3</span>
+          <h2 class="step-title" id="lq-question">Loading…</h2>
+          <div class="lq-mini-prog"><div class="lq-mini-fill" id="lq-prog-fill" style="width:0%"></div></div>
+          <div class="quiz-options" id="lq-options"></div>
+          <div class="quiz-feedback" id="lq-feedback"></div>
+        </div>
+        <div class="step-footer">
+          <button class="btn btn-P btn-block" id="lq-btn" onclick="handleLessonQuiz()" disabled style="opacity:0.45;">
+            Check Answer
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /screen-lesson -->
+
+
+    <!-- ====================================================
+         SCREEN: QUIZ
+         ==================================================== -->
+    <div id="screen-quiz" class="screen">
+
+      <div class="back-header">
+        <button class="back-btn" onclick="goBack()"><i class="ph ph-arrow-left"></i></button>
+        <span class="back-header-title">Knowledge Check</span>
+      </div>
+
+      <div class="quiz-prog-header">
+        <div class="quiz-prog-info">
+          <span class="quiz-q-num" id="q-num-label">Question 1 of 5</span>
+          <span class="quiz-pts"><i class="ph ph-star" style="color:var(--ACC);"></i> 80 XP</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="quiz-prog" style="width:20%"></div></div>
+      </div>
+
+      <div class="quiz-scroll">
+        <div style="margin-bottom:10px;">
+          <span class="badge badge-P" id="q-type-badge"><i class="ph ph-list-checks"></i> Multiple Choice</span>
+        </div>
+        <p class="quiz-question" id="q-text">Loading…</p>
+        <div class="quiz-options" id="q-options"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+      </div>
+
+      <div class="quiz-footer">
+        <button class="btn btn-P btn-block" id="q-btn" onclick="handleQuizBtn()" disabled style="opacity:0.45;">
+          Check Answer
+        </button>
+      </div>
+
+    </div><!-- /screen-quiz -->
+
+
+    <!-- ====================================================
+         SCREEN: QUIZ RESULT
+         ==================================================== -->
+    <div id="screen-quiz-result" class="screen">
+
+      <div class="back-header">
+        <button class="back-btn" onclick="navigate('screen-module')"><i class="ph ph-arrow-left"></i></button>
+        <span class="back-header-title">Quiz Complete</span>
+      </div>
+
+      <div class="result-scroll">
+        <div class="result-circle" id="result-circle">
+          <span class="result-score" id="result-score-val">80%</span>
+          <span class="result-score-sub" id="result-score-sub">PASSED</span>
+        </div>
+        <h2 class="result-title" id="result-title">Great job, Sarah! 🎉</h2>
+        <p class="result-sub" id="result-sub">You passed the knowledge check. Your answers show a solid understanding of email safety.</p>
+        <div class="result-stats">
+          <div class="result-stat"><span class="v" id="res-correct">4/5</span><span class="l">Correct</span></div>
+          <div class="result-stat"><span class="v" style="color:var(--ACC);">+80</span><span class="l">XP Earned</span></div>
+          <div class="result-stat"><span class="v" style="color:var(--PUR);">4 min</span><span class="l">Time Taken</span></div>
+        </div>
+        <div class="cert-card">
+          <span class="cert-icon">🏆</span>
+          <div>
+            <h4>Certificate Unlocked!</h4>
+            <p>Phishing &amp; Email Safety — Cybersecurity Basics</p>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn btn-P btn-block" onclick="navigate('screen-lesson')">
+            <i class="ph ph-arrow-right"></i> Next Lesson
+          </button>
+          <button class="btn btn-out btn-block" onclick="navigate('screen-module')">
+            Back to Module
+          </button>
+        </div>
+      </div>
+    </div><!-- /screen-quiz-result -->
+
+
+    <!-- ====================================================
+         SCREEN: MY LEARNING
+         ==================================================== -->
+    <div id="screen-mylearning" class="screen">
+
+      <div class="app-header">
+        <span class="app-header-title">My Learning</span>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="toggleNotif()"><i class="ph ph-bell"></i></button>
+        </div>
+      </div>
+
+      <div class="ml-hero">
+        <p class="greeting">Week 13 · 2026</p>
+        <h2>Sarah's Progress</h2>
+        <div class="ml-stats">
+          <div class="ml-stat"><span class="v">8.5h</span><span class="l">Learning Time</span></div>
+          <div class="ml-stat"><span class="v">3</span><span class="l">Modules Done</span></div>
+          <div class="ml-stat"><span class="v">🔥5</span><span class="l">Day Streak</span></div>
+        </div>
+      </div>
+
+      <div class="scroll-area">
+
+        <div class="section-lbl">COMPLIANCE STATUS</div>
+        <div class="card">
+          <div class="compliance-item">
+            <div class="comp-dot" style="background:var(--DAN);"></div>
+            <div class="comp-info">
+              <div class="ct">Cybersecurity Basics</div>
+              <div class="cd">Due 1 Apr &nbsp;·&nbsp; <strong style="color:var(--P);">IN PROGRESS — 40%</strong></div>
+            </div>
+            <span class="badge badge-DAN">Urgent</span>
+          </div>
+          <div class="compliance-item">
+            <div class="comp-dot" style="background:var(--ACC);"></div>
+            <div class="comp-info">
+              <div class="ct">Infection Control</div>
+              <div class="cd">Due 15 Apr &nbsp;·&nbsp; Not Started</div>
+            </div>
+            <span class="badge badge-ACC">Upcoming</span>
+          </div>
+          <div class="compliance-item">
+            <div class="comp-dot" style="background:var(--SUC);"></div>
+            <div class="comp-info">
+              <div class="ct">Fire Safety Procedures</div>
+              <div class="cd">Completed 15 Mar 2026</div>
+            </div>
+            <span class="badge badge-SUC"><i class="ph ph-check"></i> Done</span>
+          </div>
+        </div>
+
+        <div class="section-lbl">AI LEARNING PATH</div>
+        <div class="ai-path-card">
+          <div class="ai-path-header">
+            <span class="ai-badge">AI RECOMMENDED</span>
+            <h4>Your Personalised Path</h4>
+          </div>
+          <p>Based on your role as <strong>Registered Nurse</strong> and your pre-assessment results:</p>
+          <div class="path-steps">
+            <div class="path-step"><span class="ps-num">1</span><span class="ps-txt">Cybersecurity Basics</span><i class="ph-fill ph-check-circle ps-done"></i></div>
+            <div class="path-step" style="opacity:0.95"><span class="ps-num">2</span><span class="ps-txt">Patient Care Essentials</span><i class="ph ph-circle ps-done" style="opacity:0.4;"></i></div>
+            <div class="path-step" style="opacity:0.7"><span class="ps-num">3</span><span class="ps-txt">Dementia Care</span><i class="ph ph-circle ps-done" style="opacity:0.4;"></i></div>
+            <div class="path-step" style="opacity:0.5"><span class="ps-num">4</span><span class="ps-txt">Communication Skills</span><i class="ph ph-circle ps-done" style="opacity:0.4;"></i></div>
+          </div>
+        </div>
+
+        <!-- ── COURSES COMPLETED ── -->
+        <div class="section-lbl" style="margin-top:4px;">COURSES COMPLETED</div>
+
+        <div class="comp-course-card">
+          <div class="comp-course-thumb ci-cyber"><i class="ph-fill ph-shield-check"></i></div>
+          <div class="comp-course-info">
+            <div class="comp-course-name">Cybersecurity Basics</div>
+            <div class="comp-course-meta">
+              <span><i class="ph ph-calendar-check"></i> 28 Mar 2026</span>
+              <span style="color:var(--SUC);font-weight:600;">92%</span>
+            </div>
+            <div class="comp-score-bar-wrap"><div class="comp-score-bar" style="width:92%;"></div></div>
+          </div>
+          <span class="badge badge-SUC"><i class="ph ph-check"></i> Done</span>
+        </div>
+
+        <div class="comp-course-card">
+          <div class="comp-course-thumb ci-fire"><i class="ph-fill ph-fire"></i></div>
+          <div class="comp-course-info">
+            <div class="comp-course-name">Fire Safety Procedures</div>
+            <div class="comp-course-meta">
+              <span><i class="ph ph-calendar-check"></i> 15 Mar 2026</span>
+              <span style="color:var(--SUC);font-weight:600;">88%</span>
+            </div>
+            <div class="comp-score-bar-wrap"><div class="comp-score-bar" style="width:88%;"></div></div>
+          </div>
+          <span class="badge badge-SUC"><i class="ph ph-check"></i> Done</span>
+        </div>
+
+        <div class="comp-course-card">
+          <div class="comp-course-thumb ci-comm"><i class="ph-fill ph-chat-circle-dots"></i></div>
+          <div class="comp-course-info">
+            <div class="comp-course-name">Communication Skills</div>
+            <div class="comp-course-meta">
+              <span><i class="ph ph-calendar-check"></i> 5 Feb 2026</span>
+              <span style="color:var(--SUC);font-weight:600;">79%</span>
+            </div>
+            <div class="comp-score-bar-wrap"><div class="comp-score-bar" style="width:79%;"></div></div>
+          </div>
+          <span class="badge badge-SUC"><i class="ph ph-check"></i> Done</span>
+        </div>
+
+        <!-- ── CERTIFICATES EARNED ── -->
+        <div class="section-lbl" style="margin-top:6px;">CERTIFICATES EARNED</div>
+
+        <div class="cert-card">
+          <div class="cert-card-footer">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:34px;height:34px;border-radius:9px;background:var(--PL);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="ph-fill ph-certificate" style="font-size:18px;color:var(--P);"></i>
+              </div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--TXT);">Cybersecurity Basics</div>
+                <div style="font-size:12px;color:var(--MUT);margin-top:2px;">Issued 28 Mar 2026</div>
+              </div>
+            </div>
+            <button class="cert-view-btn"><i class="ph ph-arrow-square-out"></i> View</button>
+          </div>
+        </div>
+
+        <div class="cert-card">
+          <div class="cert-card-footer">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:34px;height:34px;border-radius:9px;background:#FEF0EF;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="ph-fill ph-certificate" style="font-size:18px;color:var(--DAN);"></i>
+              </div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--TXT);">Fire Safety Procedures</div>
+                <div style="font-size:12px;color:var(--MUT);margin-top:2px;">Issued 15 Mar 2026</div>
+              </div>
+            </div>
+            <button class="cert-view-btn"><i class="ph ph-arrow-square-out"></i> View</button>
+          </div>
+        </div>
+
+        <div class="section-lbl">ACHIEVEMENTS</div>
+        <div class="achievements-grid">
+          <div class="achievement">
+            <div class="ach-badge"><div class="ach-badge-ring" style="background:linear-gradient(145deg,#4A7FF0,#2B3EA8);"><i class="ph-fill ph-shield-check"></i></div></div>
+            <div class="ach-name">First Shield</div><div class="ach-desc">Completed first lesson</div>
+          </div>
+          <div class="achievement">
+            <div class="ach-badge"><div class="ach-badge-ring" style="background:linear-gradient(145deg,#FF8C42,#E07820);"><i class="ph-fill ph-fire"></i></div></div>
+            <div class="ach-name">5-Day Streak</div><div class="ach-desc">5 days in a row</div>
+          </div>
+          <div class="achievement">
+            <div class="ach-badge"><div class="ach-badge-ring" style="background:linear-gradient(145deg,#9B72CF,#7B5EA7);"><i class="ph-fill ph-graduation-cap"></i></div></div>
+            <div class="ach-name">Quiz Master</div><div class="ach-desc">Scored 90%+ on a quiz</div>
+          </div>
+          <div class="achievement locked">
+            <div class="ach-badge"><div class="ach-badge-ring" style="background:linear-gradient(145deg,#34C5E0,#1A9FAF);"><i class="ph-fill ph-lightning"></i></div></div>
+            <div class="ach-name">Fast Learner</div><div class="ach-desc">5 lessons in a day</div>
+          </div>
+          <div class="achievement locked">
+            <div class="ach-badge"><div class="ach-badge-ring" style="background:linear-gradient(145deg,#FFD060,#F0A800);"><i class="ph-fill ph-star"></i></div></div>
+            <div class="ach-name">Perfect Score</div><div class="ach-desc">100% on any quiz</div>
+          </div>
+          <div class="achievement">
+            <div class="ach-badge"><div class="ach-badge-ring" style="background:linear-gradient(145deg,#3DD4A0,#2DAF7B);"><i class="ph-fill ph-notebook"></i></div></div>
+            <div class="ach-name">Reflector</div><div class="ach-desc">Wrote 2 journal entries</div>
+          </div>
+        </div>
+
+        <div class="section-lbl" style="margin-top:18px;display:flex;justify-content:space-between;align-items:center;">
+          <span>LEARNING JOURNAL</span>
+          <button class="btn btn-xs btn-out" style="text-transform:none;letter-spacing:0;">+ New Entry</button>
+        </div>
+
+        <div class="journal-entry">
+          <div class="je-header">
+            <span class="je-mod">Phishing &amp; Email Safety</span>
+            <span class="je-date">28 Mar 2026</span>
+          </div>
+          <p>The scenario about the fake IT email was really eye-opening. I need to double-check sender addresses more carefully.</p>
+        </div>
+
+        <div class="journal-entry">
+          <div class="je-header">
+            <span class="je-mod">Password Security</span>
+            <span class="je-date">27 Mar 2026</span>
+          </div>
+          <p>Learned that using a passphrase is better than a complex short password. Going to update my passwords this week.</p>
+        </div>
+
+      </div>
+    </div><!-- /screen-mylearning -->
+
+
+    <!-- ====================================================
+         SCREEN: MORE
+         ==================================================== -->
+    <div id="screen-more" class="screen">
+
+      <div class="app-header">
+        <span class="app-header-title">More</span>
+      </div>
+
+      <div class="scroll-area">
+        <div class="profile-card-wrap">
+          <div class="profile-avatar">SC</div>
+          <h3>Sarah Chen</h3>
+          <p class="role">Registered Nurse &nbsp;·&nbsp; Ward 3B</p>
+          <div class="profile-badges">
+            <span class="prof-badge">Nurse</span>
+            <span class="prof-badge">3 Certs</span>
+            <span class="prof-badge">🔥5 Streak</span>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-label">Learning Preferences</div>
+          <div class="settings-item">
+            <div class="s-icon" style="background:var(--PL);color:var(--P);"><i class="ph-fill ph-bell"></i></div>
+            <div class="s-txt"><div class="st">Notifications</div><div class="ss">Reminders &amp; deadlines</div></div>
+            <div class="toggle" onclick="this.classList.toggle('off')"></div>
+          </div>
+          <div class="settings-item">
+            <div class="s-icon" style="background:var(--TEAL);color:var(--TEA);"><i class="ph-fill ph-brain"></i></div>
+            <div class="s-txt"><div class="st">Spaced Repetition</div><div class="ss">Flashcard review scheduling</div></div>
+            <div class="toggle" onclick="this.classList.toggle('off')"></div>
+          </div>
+          <div class="settings-item">
+            <div class="s-icon" style="background:var(--PURL);color:var(--PUR);"><i class="ph-fill ph-eye"></i></div>
+            <div class="s-txt"><div class="st">Accessibility Mode</div><div class="ss">Larger text, high contrast</div></div>
+            <div class="toggle off" onclick="this.classList.toggle('off')"></div>
+          </div>
+          <div class="settings-item">
+            <div class="s-icon" style="background:var(--SUCL);color:var(--SUC);"><i class="ph-fill ph-globe"></i></div>
+            <div class="s-txt"><div class="st">Language</div><div class="ss">English</div></div>
+            <i class="ph ph-caret-right s-arrow"></i>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-label">Support &amp; Info</div>
+          <div class="settings-item">
+            <div class="s-icon" style="background:var(--ACCL);color:var(--ACC);"><i class="ph-fill ph-question"></i></div>
+            <div class="s-txt"><div class="st">Help Centre</div></div>
+            <i class="ph ph-caret-right s-arrow"></i>
+          </div>
+          <div class="settings-item">
+            <div class="s-icon" style="background:var(--BG);color:var(--MUT);"><i class="ph-fill ph-lock"></i></div>
+            <div class="s-txt"><div class="st">Privacy Policy</div></div>
+            <i class="ph ph-caret-right s-arrow"></i>
+          </div>
+          <div class="settings-item">
+            <div class="s-icon" style="background:var(--PL);color:var(--P);"><i class="ph-fill ph-info"></i></div>
+            <div class="s-txt"><div class="st">About CaritaHub</div><div class="ss">Version 1.0 · Prototype</div></div>
+            <i class="ph ph-caret-right s-arrow"></i>
+          </div>
+        </div>
+
+        <button class="btn btn-block" style="background:var(--DANL);color:var(--DAN);border:1.5px solid var(--DAN);font-size:15px;padding:13px;" onclick="alert('Demo: Logout')">
+          <i class="ph ph-sign-out"></i> Log Out
+        </button>
+        <p style="text-align:center;font-size:12px;color:var(--BOR);margin-top:14px;margin-bottom:4px;">CaritaHub · Staff Learning App · Prototype</p>
+      </div>
+    </div><!-- /screen-more -->
+
+  </div><!-- /screens -->
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-item active" id="tab-home"       onclick="switchTab('home')">
+      <i class="ph-fill ph-house"></i><span>Home</span>
+    </button>
+    <button class="tab-item"        id="tab-learn"      onclick="switchTab('learn')">
+      <i class="ph-fill ph-books"></i><span>Learn</span>
+    </button>
+    <button class="tab-item"        id="tab-mylearning" onclick="switchTab('mylearning')">
+      <i class="ph-fill ph-chart-bar"></i><span>My Learning</span>
+    </button>
+    <button class="tab-item"        id="tab-more"       onclick="switchTab('more')">
+      <i class="ph-fill ph-dots-three-outline"></i><span>More</span>
+    </button>
+  </div>
+
+  <!-- NOTIFICATION PANEL -->
+  <div id="notif-panel" class="notif-panel">
+    <div class="notif-overlay" onclick="toggleNotif()"></div>
+    <div class="notif-drawer">
+      <div class="notif-top">
+        <h3>Notifications</h3>
+        <button class="close-btn" onclick="toggleNotif()"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="notif-item unread">
+        <div class="n-icon" style="background:var(--DANL);color:var(--DAN);"><i class="ph-fill ph-warning-circle"></i></div>
+        <div class="n-content">
+          <div class="n-title">Mandatory Module Due Soon</div>
+          <div class="n-text">Cybersecurity Basics is due in 2 days. You are 40% complete.</div>
+          <div class="n-time">Just now</div>
+        </div>
+      </div>
+      <div class="notif-item unread">
+        <div class="n-icon" style="background:var(--TEAL);color:var(--TEA);"><i class="ph-fill ph-brain"></i></div>
+        <div class="n-content">
+          <div class="n-title">Review Time!</div>
+          <div class="n-text">3 flashcards are ready for spaced repetition review.</div>
+          <div class="n-time">1 hour ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="n-icon" style="background:var(--ACCL);color:var(--ACC);"><i class="ph-fill ph-trophy"></i></div>
+        <div class="n-content">
+          <div class="n-title">Achievement Unlocked 🎉</div>
+          <div class="n-text">You earned the "5-Day Streak" badge!</div>
+          <div class="n-time">Yesterday</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="n-icon" style="background:var(--PURL);color:var(--PUR);"><i class="ph-fill ph-plus-circle"></i></div>
+        <div class="n-content">
+          <div class="n-title">New Module Available</div>
+          <div class="n-text">Medication Management has been added to your library.</div>
+          <div class="n-time">2 days ago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<!-- ============================================================ JAVASCRIPT -->
+<script>
+// ————— NAVIGATION —————
+let navStack = [];
+let currentScreen = 'screen-home';
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  currentScreen = id;
+}
+
+function navigate(id) {
+  navStack.push(currentScreen);
+  showScreen(id);
+  if (id === 'screen-quiz') initQuiz();
+  if (id === 'screen-lesson') initLesson();
+  if (id === 'screen-fcreview') startFcReview();
+}
+
+function goBack() {
+  if (navStack.length > 0) { showScreen(navStack.pop()); }
+}
+
+function switchTab(tab) {
+  navStack = [];
+  showScreen('screen-' + tab);
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  const el = document.getElementById('tab-' + tab);
+  if (el) el.classList.add('active');
+}
+
+// Category chip toggle
+document.querySelectorAll('.cat-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ————— NOTIFICATIONS —————
+function toggleNotif() {
+  document.getElementById('notif-panel').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+//   STEP-BY-STEP LESSON PLAYER
+// ═══════════════════════════════════════════════════════════
+const LESSON_STEPS = ['ls-read','ls-video','ls-scenario','ls-flashcard','ls-apply','ls-quiz'];
+let lessonStep = 0;
+let lsScenarioDone = false;
+let lsCardFlipped = false;
+let lsVideoWatched = false;
+let lqStep = 0, lqScore = 0, lqAnswered = false, lqSelected = null;
+let readAloudActive = false;
+let videoSimTimer = null;
+
+const lqData = [
+  {
+    q: 'Which of these is the clearest sign of a phishing email?',
+    opts: ['It comes from your manager','It asks you to click a link and enter your password','It is about a company policy update','It has an attachment with a PDF'],
+    ans: 1,
+    fb: { ok: '✅ Correct! Legitimate systems will never ask you to enter credentials via a link in an email.', bad: '❌ The clearest sign is being asked to click a link and enter credentials — always a red flag.' }
+  },
+  {
+    q: 'What should you do immediately after receiving a suspicious email?',
+    opts: ['Reply asking if it is genuine','Delete it and ignore it completely','Report it to IT and do not click any links','Forward it to a colleague to check'],
+    ans: 2,
+    fb: { ok: '✅ Correct! Always report suspicious emails to IT — they can investigate and protect the whole organisation.', bad: '❌ You should report it to IT immediately — they need to know so they can protect the whole network.' }
+  },
+  {
+    q: 'Spear phishing differs from regular phishing because it:',
+    opts: ['Uses more aggressive language','Targets a specific person using personal details','Always includes a malware attachment','Comes from a known internal email address'],
+    ans: 1,
+    fb: { ok: '✅ Correct! Spear phishing is highly personalised, making it much harder to detect than generic phishing.', bad: '❌ Spear phishing specifically targets individuals by using personal details to appear more convincing.' }
+  }
+];
+
+function initLesson() {
+  lessonStep = 0;
+  lsScenarioDone = false;
+  lsCardFlipped = false;
+  lsVideoWatched = false;
+  lqStep = 0; lqScore = 0; lqAnswered = false; lqSelected = null;
+  // Stop any read-aloud
+  if (readAloudActive) { window.speechSynthesis && window.speechSynthesis.cancel(); readAloudActive = false; }
+  const raBtn = document.getElementById('read-aloud-btn');
+  if (raBtn) raBtn.innerHTML = '<i class="ph-fill ph-speaker-high"></i>';
+  // Reset video
+  if (videoSimTimer) { clearInterval(videoSimTimer); videoSimTimer = null; }
+  const vpBtn = document.getElementById('video-play-btn');
+  if (vpBtn) vpBtn.innerHTML = '<i class="ph-fill ph-play" style="margin-left:3px;"></i>';
+  const vpFill = document.getElementById('video-prog-fill');
+  if (vpFill) vpFill.style.width = '0%';
+  const vtLabel = document.getElementById('video-time-label');
+  if (vtLabel) vtLabel.textContent = '0:00';
+  const vnBtn = document.getElementById('video-next-btn');
+  if (vnBtn) { vnBtn.disabled = true; vnBtn.style.opacity = '0.45'; }
+  // Reset scenario
+  const scOpts = document.querySelectorAll('#ls-scenario .sc-option');
+  scOpts.forEach(o => { o.classList.remove('sc-correct','sc-wrong'); o.style.pointerEvents = ''; });
+  const scFb = document.getElementById('ls-sc-feedback');
+  if (scFb) { scFb.className = 'sc-feedback'; scFb.innerHTML = ''; }
+  const scBtn = document.getElementById('sc-next-btn');
+  if (scBtn) { scBtn.disabled = true; scBtn.style.opacity = '0.45'; }
+  // Reset flashcard
+  const card = document.getElementById('ls-flashcard-card');
+  if (card) card.classList.remove('flipped');
+  const fcBtn = document.getElementById('fc-next-btn');
+  if (fcBtn) { fcBtn.disabled = true; fcBtn.style.opacity = '0.45'; }
+  // Reset apply
+  const applyInput = document.getElementById('ls-apply-input');
+  if (applyInput) applyInput.value = '';
+  const applyHint = document.getElementById('apply-char-hint');
+  if (applyHint) applyHint.textContent = '0 / 20 characters minimum';
+  const applyBtn = document.getElementById('apply-next-btn');
+  if (applyBtn) { applyBtn.disabled = true; applyBtn.style.opacity = '0.45'; }
+  showLessonStep(0);
+}
+
+function showLessonStep(idx) {
+  lessonStep = idx;
+  LESSON_STEPS.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i === idx);
+  });
+  updateLessonDots(idx);
+  if (idx === 4) initLessonQuiz();
+}
+
+function updateLessonDots(idx) {
+  for (let i = 0; i < LESSON_STEPS.length; i++) {
+    const dot = document.getElementById('sdot-' + i);
+    if (!dot) continue;
+    dot.classList.remove('active','done');
+    if (i < idx)        dot.classList.add('done');
+    else if (i === idx) dot.classList.add('active');
+  }
+}
+
+function lessonNext() {
+  if (lessonStep < LESSON_STEPS.length - 1) {
+    showLessonStep(lessonStep + 1);
+  }
+}
+
+function lessonBack() {
+  if (lessonStep > 0) {
+    showLessonStep(lessonStep - 1);
+  } else {
+    goBack();
+  }
+}
+
+// — Scenario
+function selectLessonScenario(el, isCorrect) {
+  if (lsScenarioDone) return;
+  lsScenarioDone = true;
+  document.querySelectorAll('#ls-scenario .sc-option').forEach(o => o.style.pointerEvents = 'none');
+  const fb = document.getElementById('ls-sc-feedback');
+  if (isCorrect) {
+    el.classList.add('sc-correct');
+    fb.className = 'sc-feedback fb-ok show';
+    fb.innerHTML = '✅ <strong>Correct!</strong> Reporting phishing emails immediately helps protect the entire organisation.';
+  } else {
+    el.classList.add('sc-wrong');
+    document.querySelectorAll('#ls-scenario .sc-option')[2].classList.add('sc-correct');
+    fb.className = 'sc-feedback fb-bad show';
+    fb.innerHTML = '❌ <strong>Not quite.</strong> The correct answer is C — delete the email and report it to IT immediately.';
+  }
+  const btn = document.getElementById('sc-next-btn');
+  if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+}
+
+// — Flashcard
+function flipLessonCard() {
+  const card = document.getElementById('ls-flashcard-card');
+  if (!card) return;
+  card.classList.toggle('flipped');
+  if (card.classList.contains('flipped') && !lsCardFlipped) {
+    lsCardFlipped = true;
+    const btn = document.getElementById('fc-next-btn');
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+  }
+}
+
+// — Read Aloud
+function toggleReadAloud() {
+  const btn = document.getElementById('read-aloud-btn');
+  if (readAloudActive) {
+    window.speechSynthesis && window.speechSynthesis.cancel();
+    readAloudActive = false;
+    if (btn) btn.innerHTML = '<i class="ph-fill ph-speaker-high"></i>';
+  } else {
+    const scrollEl = document.querySelector('#ls-read .step-scroll');
+    const text = scrollEl ? scrollEl.innerText.replace(/Done Reading.*/, '').trim() : '';
+    if (window.speechSynthesis && text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.95;
+      utter.onend = () => {
+        readAloudActive = false;
+        const b = document.getElementById('read-aloud-btn');
+        if (b) b.innerHTML = '<i class="ph-fill ph-speaker-high"></i>';
+      };
+      window.speechSynthesis.speak(utter);
+      readAloudActive = true;
+      if (btn) btn.innerHTML = '<i class="ph-fill ph-speaker-slash"></i>';
+    }
+  }
+}
+
+// — Video (simulated playback)
+function playLessonVideo() {
+  const playBtn = document.getElementById('video-play-btn');
+  const progFill = document.getElementById('video-prog-fill');
+  const timeLabel = document.getElementById('video-time-label');
+  const nextBtn = document.getElementById('video-next-btn');
+  if (!playBtn) return;
+
+  if (videoSimTimer) {
+    clearInterval(videoSimTimer);
+    videoSimTimer = null;
+    playBtn.innerHTML = '<i class="ph-fill ph-play" style="margin-left:3px;"></i>';
+    return;
+  }
+  playBtn.innerHTML = '<i class="ph-fill ph-pause"></i>';
+  const totalSec = 135; // 2:15
+  let elapsed = parseInt(progFill ? progFill.style.width : 0) / 100 * totalSec;
+
+  videoSimTimer = setInterval(() => {
+    elapsed = Math.min(elapsed + 1, totalSec);
+    const pct = (elapsed / totalSec) * 100;
+    if (progFill) progFill.style.width = pct + '%';
+    const m = Math.floor(elapsed / 60);
+    const s = Math.floor(elapsed % 60);
+    if (timeLabel) timeLabel.textContent = m + ':' + String(s).padStart(2,'0');
+
+    if (elapsed >= totalSec) {
+      clearInterval(videoSimTimer); videoSimTimer = null;
+      playBtn.innerHTML = '<i class="ph-fill ph-check" style="color:var(--SUC);"></i>';
+      lsVideoWatched = true;
+      if (nextBtn) { nextBtn.disabled = false; nextBtn.style.opacity = '1'; }
+    }
+  }, 50); // fast simulation so demo is usable
+}
+
+// — Apply It
+function checkApplyInput() {
+  const ta = document.getElementById('ls-apply-input');
+  const hint = document.getElementById('apply-char-hint');
+  const btn = document.getElementById('apply-next-btn');
+  if (!ta) return;
+  const len = ta.value.length;
+  if (hint) hint.textContent = len + ' / 20 characters minimum';
+  if (btn) {
+    const ok = len >= 20;
+    btn.disabled = !ok;
+    btn.style.opacity = ok ? '1' : '0.45';
+  }
+}
+
+// — Mini quiz inside lesson
+function initLessonQuiz() {
+  lqStep = 0; lqScore = 0; lqAnswered = false; lqSelected = null;
+  renderLessonQuizQ();
+}
+
+function renderLessonQuizQ() {
+  lqAnswered = false; lqSelected = null;
+  const d = lqData[lqStep];
+  const total = lqData.length;
+  // Chip
+  const chip = document.getElementById('lq-chip');
+  if (chip) chip.innerHTML = '<i class="ph-fill ph-check-square"></i> Quiz · ' + (lqStep + 1) + '/' + total;
+  // Question
+  const qEl = document.getElementById('lq-question');
+  if (qEl) qEl.textContent = d.q;
+  // Progress bar
+  const fill = document.getElementById('lq-prog-fill');
+  if (fill) fill.style.width = (lqStep / total * 100) + '%';
+  // Options
+  const optWrap = document.getElementById('lq-options');
+  const letters = ['A','B','C','D'];
+  optWrap.innerHTML = d.opts.map((o, i) =>
+    `<button class="quiz-option" onclick="selectLessonQuizOpt(this,${i})">
+       <span class="opt-letter">${letters[i]}</span>${o}
+     </button>`
+  ).join('');
+  // Feedback
+  const fb = document.getElementById('lq-feedback');
+  if (fb) { fb.className = 'quiz-feedback'; fb.innerHTML = ''; }
+  // Button
+  const btn = document.getElementById('lq-btn');
+  if (btn) {
+    btn.disabled = true; btn.style.opacity = '0.45';
+    btn.textContent = lqStep < total - 1 ? 'Check Answer' : 'Check Answer';
+  }
+}
+
+function selectLessonQuizOpt(el, idx) {
+  if (lqAnswered) return;
+  lqSelected = idx;
+  document.querySelectorAll('#lq-options .quiz-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  const btn = document.getElementById('lq-btn');
+  if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+}
+
+function handleLessonQuiz() {
+  if (!lqAnswered && lqSelected === null) return;
+  const total = lqData.length;
+  if (!lqAnswered) {
+    // Check answer
+    lqAnswered = true;
+    const d = lqData[lqStep];
+    const opts = document.querySelectorAll('#lq-options .quiz-option');
+    opts.forEach(o => o.style.pointerEvents = 'none');
+    opts[lqSelected].classList.remove('selected');
+    const correct = lqSelected === d.ans;
+    if (correct) { opts[lqSelected].classList.add('correct'); lqScore++; }
+    else { opts[lqSelected].classList.add('wrong'); opts[d.ans].classList.add('correct'); }
+    const fb = document.getElementById('lq-feedback');
+    fb.className = 'quiz-feedback show ' + (correct ? 'fb-ok' : 'fb-bad');
+    fb.innerHTML = correct ? d.fb.ok : d.fb.bad;
+    const btn = document.getElementById('lq-btn');
+    if (lqStep < total - 1) {
+      btn.textContent = 'Next Question →';
+    } else {
+      btn.innerHTML = 'See Results <i class="ph ph-trophy"></i>';
+    }
+    btn.disabled = false; btn.style.opacity = '1';
+  } else {
+    // Advance
+    if (lqStep < total - 1) {
+      lqStep++;
+      renderLessonQuizQ();
+    } else {
+      // Done — show quiz result screen
+      showLessonResult();
+    }
+  }
+}
+
+function showLessonResult() {
+  const total = lqData.length;
+  const pct = Math.round(lqScore / total * 100);
+  const pass = pct >= 67;
+  // Pre-fill the quiz result screen then navigate to it
+  const circle = document.querySelector('.result-circle');
+  const scoreEl = document.querySelector('.result-score');
+  const scoreSub = document.querySelector('.result-score-sub');
+  const titleEl = document.querySelector('.result-title');
+  const subEl   = document.querySelector('.result-sub');
+  if (circle) circle.className = 'result-circle' + (pass ? '' : ' fail-circle');
+  if (scoreEl) { scoreEl.className = 'result-score' + (pass ? '' : ' fail'); scoreEl.textContent = pct + '%'; }
+  if (scoreSub) { scoreSub.className = 'result-score-sub' + (pass ? '' : ' fail'); scoreSub.textContent = lqScore + '/' + total + ' correct'; }
+  if (titleEl) titleEl.textContent = pass ? '🎉 Lesson Complete!' : 'Keep Practising!';
+  if (subEl) subEl.textContent = pass
+    ? 'You passed the quiz. Great work on completing Phishing & Email Safety!'
+    : 'You scored ' + lqScore + '/' + total + '. Review the lesson and try again.';
+  navigate('screen-quiz-result');
+}
+
+// ————— FILTER SHEETS —————
+const filterData = {
+  topic: {
+    title: 'Filter by Topic',
+    options: ['All Topics','Cybersecurity','Patient Care','Fire Safety','Communications','Dementia Care','Infection Control','Medication']
+  },
+  duration: {
+    title: 'Filter by Duration',
+    options: ['Any Duration','Under 10 min','10–20 min','20–30 min','30+ min']
+  },
+  status: {
+    title: 'Filter by Status',
+    options: ['All','Mandatory','Not Started','In Progress','Completed','New This Week']
+  }
+};
+let activeFilterType = null;
+function openFilter(type) {
+  activeFilterType = type;
+  const data = filterData[type];
+  document.getElementById('filter-sheet-title').innerHTML =
+    `${data.title} <button class="fs-close" onclick="closeFilter()">✕</button>`;
+  const optsEl = document.getElementById('filter-options');
+  optsEl.innerHTML = '';
+  data.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-opt' + (i === 0 ? ' sel' : '');
+    btn.textContent = opt;
+    btn.onclick = () => {
+      optsEl.querySelectorAll('.filter-opt').forEach(o => o.classList.remove('sel'));
+      btn.classList.add('sel');
+    };
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('filter-overlay').classList.add('open');
+}
+function closeFilter() {
+  document.getElementById('filter-overlay').classList.remove('open');
+  // Update the button label with the selected option
+  const optsEl = document.getElementById('filter-options');
+  const sel = optsEl.querySelector('.sel');
+  if (sel && activeFilterType) {
+    const btnIdMap = { topic: 'topic-filter-btn', duration: 'duration-filter-btn', status: 'status-filter-btn' };
+    const icons    = { topic: 'ph-fill ph-tag',   duration: 'ph-fill ph-clock',    status: 'ph ph-funnel' };
+    const defaults = { topic: 'All Topics',        duration: 'Any Duration',        status: 'All' };
+    const btn = document.getElementById(btnIdMap[activeFilterType]);
+    if (!btn) return;
+    const label = sel.textContent;
+    btn.innerHTML = `<i class="${icons[activeFilterType]}"></i> ${label} <i class="ph ph-caret-down filter-caret"></i>`;
+    const isDefault = label === defaults[activeFilterType];
+    if (isDefault) btn.classList.remove('active'); else btn.classList.add('active');
+  }
+}
+
+// ————— QUIZ —————
+const quizData = [
+  {
+    q: 'What should you do first if you receive an email asking you to verify your password by clicking a link?',
+    opts: ['Click the link to verify your account is secure','Reply to the email with your current password','Delete the email and report it to IT immediately','Forward it to your manager for approval'],
+    answer: 2,
+    feedback: '✅ Correct! Phishing emails use urgency to steal credentials. Always report suspicious emails to IT — never click links or reply with passwords.'
+  },
+  {
+    q: 'Which of these is the strongest password for a work account?',
+    opts: ['Sarah1234','Caritahub2026','Tr0ub4dor!&Kx#9','p@ssword'],
+    answer: 2,
+    feedback: '✅ Correct! Strong passwords combine uppercase, lowercase, numbers and symbols with no dictionary words.'
+  },
+  {
+    q: 'What is two-factor authentication (2FA)?',
+    opts: ['Using two different passwords to log in','A second verification step after entering your password','Having two staff members approve a login','Logging in twice per day'],
+    answer: 1,
+    feedback: '✅ Correct! 2FA adds a second layer of security — usually a code from an app or SMS — protecting your account even if someone has your password.'
+  },
+  {
+    q: 'A colleague urgently asks for your login credentials to access a patient record. What do you do?',
+    opts: ["Share your credentials — it's an emergency","Email them your password then change it later","Refuse and help them access it through proper channels","Let them use your device while you supervise"],
+    answer: 2,
+    feedback: '✅ Correct! Credentials should never be shared. Help your colleague gain access through authorised channels.'
+  },
+  {
+    q: 'You find an unfamiliar USB drive in the staff room. What is the safest action?',
+    opts: ['Plug it in to find the owner','Leave it where it is','Hand it to a colleague to check','Give it to your IT department without plugging it in'],
+    answer: 3,
+    feedback: '✅ Correct! Unknown USB devices can contain malware. Always hand them to IT without inserting them into any device.'
+  }
+];
+
+let quizState = { idx: 0, answered: false, score: 0, selected: null };
+
+function initQuiz() {
+  quizState = { idx: 0, answered: false, score: 0, selected: null };
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizData[quizState.idx];
+  document.getElementById('q-num-label').textContent = `Question ${quizState.idx + 1} of ${quizData.length}`;
+  document.getElementById('quiz-prog').style.width = `${((quizState.idx + 1) / quizData.length) * 100}%`;
+  document.getElementById('q-text').textContent = q.q;
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach((letter, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.innerHTML = `<span class="opt-letter">${letter}</span> ${q.opts[i]}`;
+    btn.onclick = () => selectAnswer(btn, i);
+    optsEl.appendChild(btn);
+  });
+  const fb = document.getElementById('q-feedback');
+  fb.className = 'quiz-feedback'; fb.textContent = '';
+  const qBtn = document.getElementById('q-btn');
+  qBtn.textContent = 'Check Answer'; qBtn.disabled = true; qBtn.style.opacity = '0.45';
+  quizState.answered = false; quizState.selected = null;
+}
+
+function selectAnswer(el, idx) {
+  if (quizState.answered) return;
+  document.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  quizState.selected = idx;
+  const qBtn = document.getElementById('q-btn');
+  qBtn.disabled = false; qBtn.style.opacity = '1';
+}
+
+function handleQuizBtn() {
+  const q = quizData[quizState.idx];
+  const qBtn = document.getElementById('q-btn');
+  const fb = document.getElementById('q-feedback');
+  if (!quizState.answered) {
+    quizState.answered = true;
+    const opts = document.querySelectorAll('.quiz-option');
+    opts.forEach(o => o.style.pointerEvents = 'none');
+    opts[q.answer].classList.add('correct');
+    if (quizState.selected === q.answer) {
+      quizState.score++;
+      opts[quizState.selected].classList.remove('selected');
+      fb.className = 'quiz-feedback fb-ok show'; fb.innerHTML = q.feedback;
+    } else {
+      opts[quizState.selected].classList.add('wrong');
+      fb.className = 'quiz-feedback fb-bad show';
+      fb.innerHTML = `❌ Not quite. ${q.feedback.replace('✅ Correct! ','')}`;
+    }
+    qBtn.textContent = quizState.idx === quizData.length - 1 ? 'See Results' : 'Next Question →';
+    qBtn.disabled = false; qBtn.style.opacity = '1';
+  } else {
+    if (quizState.idx < quizData.length - 1) {
+      quizState.idx++; renderQuestion();
+    } else {
+      showResults();
+    }
+  }
+}
+
+function showResults() {
+  const pct = Math.round((quizState.score / quizData.length) * 100);
+  const passed = pct >= 60;
+  document.getElementById('result-score-val').textContent = pct + '%';
+  document.getElementById('result-score-sub').textContent = passed ? 'PASSED' : 'TRY AGAIN';
+  document.getElementById('result-circle').className = passed ? 'result-circle' : 'result-circle fail-circle';
+  document.getElementById('result-score-val').className = passed ? 'result-score' : 'result-score fail';
+  document.getElementById('result-score-sub').className = passed ? 'result-score-sub' : 'result-score-sub fail';
+  document.getElementById('result-title').textContent = passed ? 'Great job, Sarah! 🎉' : 'Almost there, Sarah!';
+  document.getElementById('result-sub').textContent = passed
+    ? `You answered ${quizState.score} of ${quizData.length} correctly. Solid understanding of email safety.`
+    : `You answered ${quizState.score} of ${quizData.length} correctly. Review the lesson and try again.`;
+  document.getElementById('res-correct').textContent = `${quizState.score}/${quizData.length}`;
+  navStack.push(currentScreen);
+  showScreen('screen-quiz-result');
+}
+
+// ============================================================
+// FLASHCARD REVIEW
+// ============================================================
+const FCR_CARDS = [
+  {
+    q: 'What is "Spear Phishing"?',
+    a: 'A targeted phishing attack where the attacker personalises the email using information about the specific victim — their name, role, or colleagues — to make it more convincing.'
+  },
+  {
+    q: 'Name two signs that an email might be a phishing attempt.',
+    a: 'Urgent or threatening language, mismatched sender address, unexpected attachments, generic greetings ("Dear User"), or links that don\'t match the displayed text.'
+  },
+  {
+    q: 'What is Two-Factor Authentication (2FA)?',
+    a: 'A security process requiring two different forms of verification to access an account — typically a password plus a one-time code sent to your phone or generated by an authenticator app.'
+  }
+];
+
+let fcrIdx = 0;
+let fcrFlipped = false;
+let fcrResults = [];  // 'know' | 'practice'
+let fcrQueue = [];    // indices to review
+
+function startFcReview() {
+  fcrQueue = FCR_CARDS.map((_, i) => i);
+  fcrResults = new Array(FCR_CARDS.length).fill(null);
+  fcrIdx = 0;
+  fcrFlipped = false;
+
+  // Hide summary, show card area
+  document.getElementById('fcr-summary').style.display = 'none';
+  document.getElementById('fcr-wrap').style.display = 'flex';
+  document.getElementById('fcr-actions').style.opacity = '0';
+  document.getElementById('fcr-actions').style.pointerEvents = 'none';
+
+  fcrRenderDots();
+  fcrShowCard(0);
+}
+
+function fcrRenderDots() {
+  const container = document.getElementById('fcr-dots');
+  container.innerHTML = fcrQueue.map((ci, i) => {
+    const res = fcrResults[ci];
+    const col = res === 'know' ? 'var(--SUC)' : res === 'practice' ? 'var(--ACC)' : i === fcrIdx ? 'var(--P)' : 'var(--BOR)';
+    const w   = i === fcrIdx ? '24px' : '8px';
+    return `<div style="height:8px;width:${w};border-radius:4px;background:${col};transition:all 0.3s;flex-shrink:0;"></div>`;
+  }).join('');
+}
+
+function fcrShowCard(idx) {
+  fcrIdx = idx;
+  fcrFlipped = false;
+  const card = document.getElementById('fcr-card');
+  card.style.transform = 'rotateY(0deg)';
+
+  const ci = fcrQueue[idx];
+  document.getElementById('fcr-question').textContent = FCR_CARDS[ci].q;
+  document.getElementById('fcr-answer').textContent   = FCR_CARDS[ci].a;
+  document.getElementById('fcr-counter').textContent  = `Card ${idx + 1} of ${fcrQueue.length}`;
+
+  // Hide action buttons until flipped
+  const actions = document.getElementById('fcr-actions');
+  actions.style.opacity = '0';
+  actions.style.pointerEvents = 'none';
+
+  fcrRenderDots();
+}
+
+function fcrFlip() {
+  if (fcrFlipped) return; // already flipped — let them decide first
+  fcrFlipped = true;
+  document.getElementById('fcr-card').style.transform = 'rotateY(180deg)';
+  // Reveal action buttons
+  const actions = document.getElementById('fcr-actions');
+  actions.style.opacity = '1';
+  actions.style.pointerEvents = 'auto';
+}
+
+function fcrAnswer(result) {
+  const ci = fcrQueue[fcrIdx];
+  fcrResults[ci] = result;
+
+  const next = fcrIdx + 1;
+  if (next < fcrQueue.length) {
+    fcrShowCard(next);
+  } else {
+    // Check if any 'practice' cards remain
+    const practiceIdx = fcrQueue.filter(i => fcrResults[i] === 'practice');
+    if (practiceIdx.length > 0) {
+      fcrShowSummary(true);
+    } else {
+      fcrShowSummary(false);
+    }
+  }
+}
+
+function fcrShowSummary(hasMissed) {
+  const knowCount     = fcrResults.filter(r => r === 'know').length;
+  const practiceCount = fcrResults.filter(r => r === 'practice').length;
+
+  document.getElementById('fcr-wrap').style.display    = 'none';
+  document.getElementById('fcr-actions').style.display = 'none';
+  const summary = document.getElementById('fcr-summary');
+  summary.style.display = 'flex';
+
+  document.getElementById('fcr-know-count').textContent     = knowCount;
+  document.getElementById('fcr-practice-count').textContent = practiceCount;
+  document.getElementById('fcr-summary-text').textContent   = knowCount === FCR_CARDS.length
+    ? 'You nailed all 3 cards. Great recall!'
+    : `${knowCount} card${knowCount !== 1 ? 's' : ''} nailed, ${practiceCount} to keep practising.`;
+
+  const retryBtn = document.getElementById('fcr-retry-btn');
+  if (hasMissed) {
+    retryBtn.style.display = 'flex';
+    retryBtn.onclick = () => {
+      fcrQueue = fcrQueue.filter(i => fcrResults[i] === 'practice');
+      fcrResults = new Array(FCR_CARDS.length).fill(null);
+      fcrIdx = 0;
+      document.getElementById('fcr-wrap').style.display = 'flex';
+      document.getElementById('fcr-actions').style.display = 'flex';
+      document.getElementById('fcr-summary').style.display = 'none';
+      fcrRenderDots();
+      fcrShowCard(0);
+    };
+  } else {
+    retryBtn.style.display = 'none';
+  }
+}
+</script>
+
+</body>
+</html>
